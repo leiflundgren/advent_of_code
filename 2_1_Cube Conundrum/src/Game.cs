@@ -74,5 +74,19 @@ namespace advent_of_code
         {
             return $"Game {N}: " + String.Join("; ", Sets.ConvertAll(s => s.ToString()));
         }
+
+
+        public bool IsPossible(Set realSet)
+        {
+            foreach ( Set set in Sets )
+            {
+                if ( set.red > realSet.red ) return false;
+                if ( set.green > realSet.green ) return false;
+                if ( set.blue > realSet.blue ) return false;
+            }
+
+            return true;
+        }
+
     }
 }
