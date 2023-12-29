@@ -23,21 +23,15 @@ namespace advent_of_code
 
             int sum = 0;
 
-            foreach ( string line in lines)
+            foreach (string line in lines)
             {
-                if  (string.IsNullOrEmpty(line)) continue;
+                if (string.IsNullOrEmpty(line)) continue;
 
                 Game g = Game.Parse(line);
 
-                if ( !g.IsPossible(MasterSet))
-                {
-                    Console.WriteLine(g + " impossible!");
-                }
-                else
-                {
-                    Console.WriteLine(g + " possible");
-                    sum += g.N;
-                }
+                Set min_required = g.MinRequired();
+
+                sum += min_required.PowerOf;
             }
 
             Console.WriteLine($"{sum}"); // 3099

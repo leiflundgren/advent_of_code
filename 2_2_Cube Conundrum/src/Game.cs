@@ -88,5 +88,18 @@ namespace advent_of_code
             return true;
         }
 
+        public Set MinRequired()
+        {
+            int r=0,g=0, b=0;
+
+            foreach (Set s in Sets)
+            {
+                r = Math.Max(r, s.red);
+                g = Math.Max(g, s.green);
+                b = Math.Max(b, s.blue);
+            }
+
+            return new Set(r,g,b);
+        }
     }
 }

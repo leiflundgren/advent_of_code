@@ -17,8 +17,7 @@ namespace advent_of_code
             this.green = green;
         }
 
-
-
+        public int PowerOf => red*green*blue;
 
         public static Set Parse(string s)
         {

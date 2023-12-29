@@ -41,7 +41,7 @@ namespace advent_of_code
         }
 
         public override bool Equals(object? obj) {  return Equals(this, obj as Game); }
-        public static bool Equals(Game x, Game y)
+        public static bool Equals(Game? x, Game? y)
         {
             if (object.ReferenceEquals(x, y)) return true;
             if (object.ReferenceEquals(x, null) || object.ReferenceEquals(null, y )) return false;
