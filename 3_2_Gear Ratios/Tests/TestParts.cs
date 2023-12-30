@@ -76,6 +76,7 @@ namespace Tests
             CollectionAssert.AreEquivalent(c.ExpectedPartNumbers, actual.PartNumbers);
             CollectionAssert.AreEquivalent(c.ExpectedGears, actual.Gears);
 
+            Assert.AreEqual(467835, actual.SumGearRatio());
         }
 
     }

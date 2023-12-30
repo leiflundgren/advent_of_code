@@ -22,7 +22,7 @@ namespace advent_of_code
 
             Parts parts = Parts.Parse(input);
 
-            int sum = parts.PartNumbers.Sum();
+            int sum = parts.SumGearRatio();
 
             //foreach ( string line in lines)
             //{

@@ -9,15 +9,43 @@ namespace advent_of_code
 {
     public class Parts
     {
-        public List<int> PartNumbers { get; private set; } = new List<int>();
+        public Parts(List<Item> items, List<(int l, int c)> gears)
+        {
+            Items = items;
+            Gears = gears;
+        }
+
+        public List<int> PartNumbers => Items.ConvertAll(itm => itm.N);
 
         public List<(int l, int c)> Gears { get; private set; } = new List<(int l, int c)> { };
+        public List<Item> Items { get; private set; }
 
         public static bool IsSymbol(char c)
         {
             return c != '\r' && c != '\n' && c != '.' && !('0' <= c && c <= '9');
+        
         }
 
+        public List<Item> FindAdjacent(int l, int c)
+        {
+            return Items.FindAll(itm => itm.IsAdjacant(l, c));
+        }
+        public int GearRatio(int l, int c)
+        {
+            var adjacent = FindAdjacent(l, c);
+            if (adjacent.Count != 2)
+                return 0;
+
+            int ratio = 1;
+            foreach (Item itm in adjacent)
+                ratio *= itm.N;
+            return ratio;
+        }
+
+        public int SumGearRatio()
+        {
+            return Gears.ConvertAll(g => GearRatio(g.l, g.c)).Sum();
+        }
 
         public static Parts Parse(string input)
         {
@@ -72,7 +100,7 @@ namespace advent_of_code
                 }
             }
 
-            return new Parts { PartNumbers = items.ConvertAll(itm => itm.N), Gears = Gears };
+            return new Parts(items, Gears);
 
             static void CreateItem(EngineSchematic map, List<Item> ls, int l, string line, ref int col_start, int col)
             {
