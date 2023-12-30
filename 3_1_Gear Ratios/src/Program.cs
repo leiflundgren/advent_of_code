@@ -17,9 +17,12 @@ namespace advent_of_code
             path = Path.GetFullPath(Path.Combine(path, "..\\..\\..\\..\\input.txt"));
             Console.WriteLine("Path: " + path);
 
-            string[] lines = File.ReadAllLines(path);
+            string input = File.ReadAllText(path);
 
-            int sum = 0;
+
+            Parts parts = Parts.Parse(input);
+
+            int sum = parts.PartNumbers.Sum();
 
             //foreach ( string line in lines)
             //{
@@ -38,7 +41,7 @@ namespace advent_of_code
             //    }
             //}
 
-            Console.WriteLine($"{sum}"); // 3099
+            Console.WriteLine($"{sum}"); // 519444
 
         }
     }

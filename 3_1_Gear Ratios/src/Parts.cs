@@ -9,7 +9,7 @@ namespace advent_of_code
 {
     public class Parts
     {
-        public List<int>? PartNumbers { get; set; }
+        public List<int> PartNumbers { get; set; } = new List<int>();
 
         public static bool IsSymbol(char c)
         {
