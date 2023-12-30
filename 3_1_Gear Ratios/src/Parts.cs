@@ -146,7 +146,7 @@ namespace advent_of_code
 
                 // add right/left, incl diagonal
                 res.Add((lineno, start_col-1));
-                res.Add((lineno, end_col + 1+1));
+                res.Add((lineno, end_col));
                 res.Sort(new SortLineCol());
                 return res;
             }
