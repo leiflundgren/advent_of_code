@@ -12,7 +12,7 @@ namespace advent_of_code
         public int[] Numbers;
         public int[] Winners;
 
-        public int[] MatchedWinners => Numbers.Intersect(Winners).ToArray();
+        public int[] MatchedWinners;
 
         public int Points => ((int)Math.Round(Math.Pow(2, MatchedWinners.Length)))/2;
 
@@ -29,12 +29,14 @@ namespace advent_of_code
             var match = regex.Match(input); 
             if (match == null) throw new ArgumentException($"invalid input line\n{input}");
 
-            string[] numbers = match.Groups[2].Value.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            string[] winners = match.Groups[3].Value.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string[] winners = match.Groups[2].Value.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string[] numbers = match.Groups[3].Value.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             Card c = new Card(int.Parse(match.Groups[1].Value));
-            c.Numbers = Array.ConvertAll(numbers, int.Parse);
             c.Winners = Array.ConvertAll(winners, int.Parse);
+            c.Numbers = Array.ConvertAll(numbers, int.Parse);
+
+            c.MatchedWinners = c.Numbers.Intersect(c.Winners).ToArray();
 
             return c;
         }
