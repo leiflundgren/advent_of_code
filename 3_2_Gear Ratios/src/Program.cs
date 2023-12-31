@@ -41,7 +41,7 @@ namespace advent_of_code
             //    }
             //}
 
-            Console.WriteLine($"{sum}"); // 519444
+            Console.WriteLine($"{sum}"); // 74528807
 
         }
     }
