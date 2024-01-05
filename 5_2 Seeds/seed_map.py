@@ -25,13 +25,7 @@ class SeedMap:
         self.map_light_to_temperature = light_to_temperature
         self.map_temperature_to_humidity = temperature_to_humidity
         self.map_humidity_to_location = humidity_to_location
-        
-
-    def seed_to_soil(self, seed) -> int:
-        return self.map_seed_to_soil.src_to_dst(seed)
-    
-    def seed_to_loc(self, seed) -> int:
-        maps = [
+        self.maps = [
             (self.map_seed_to_soil, 'map_seed_to_soil'),
             (self.map_soil_to_fertilizer, 'map_soil_to_fertilizer'),
             (self.map_fertilizer_to_water, 'map_fertilizer_to_water'),
@@ -40,25 +34,45 @@ class SeedMap:
             (self.map_temperature_to_humidity, 'map_temperature_to_humidity'),
             (self.map_humidity_to_location, 'map_humidity_to_location'),
         ]
+        
+
+    def seed_to_soil(self, seed) -> int:
+        return self.map_seed_to_soil.src_to_dst(seed)
+    
+    def seed_to_loc(self, seed) -> int:
         src = seed
-        for (map, name) in maps:
+        for (map, name) in self.maps:
             dst = map.src_to_dst(src)
-            print(f"{name}[{src}] --> {dst}")
+            # print(f"{name}[{src}] --> {dst}")
             src = dst
         
         return src
     
 
     def seed_with_lowest_location(self) -> int:
-        min_seed = 0
         min_dist = 0x7fffffff
 
-        for seed in self.all_seed_numbers():
-            loc = self.seed_to_loc(seed)
+        for m in self.map_seeds.mappings:
+            loc0 = self.seed_to_loc(m.src)
+            loc1 = self.seed_to_loc(m.src + m.len)
             
-            if loc < min_dist:
-                min_seed = seed
-                min_dist = loc
+            if loc0 < min_dist or loc1 < min_dist:
+                print(f'Range {m.src}--{m.src+m.len} gives {loc0}/{loc1} which is lower than {min_dist}')
+                for s in range(loc0, loc1):
+                    loc = self.seed_to_loc(s)
+                    print(f'seed {s} --> loc {loc}')
+                    if loc < min_dist:
+                        min_dist = loc
         
         return min_dist
     
+    def split_mappings(self):
+        far: Mapping
+        near: Mapping
+        for i in range(len(self.maps)-1, 1, -1):
+            far = self.maps[i][0]
+            near = self.maps[i-1][0]
+            
+            for dst in far.source_values():
+                src = near.dst_to_src(dst)
+                near.split_at(src)

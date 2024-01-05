@@ -41,10 +41,10 @@ class Mapping:
         return m.src+offset
     
     def source_values(self) -> list[int] :
-        return list(map( lambda m: m.src for map in self.mappings))
+        return list(map(lambda m: m.src, self.mappings))
 
     def dest_values(self) -> list[int] :
-        return list(map( lambda m: m.dst for map in self.mappings))
+        return list(map( lambda m: m.dst, self.mappings))
             
 
     def split_at(self, point : int) -> Self:
@@ -62,3 +62,5 @@ class Mapping:
                 res.append( self.Mapping(d1, s1, l1) )
             else:
                 res.append(m)
+        self.mappings = res
+        

@@ -59,6 +59,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(99, m.dst_to_src(51))
         self.assertEqual(52, m.dst_to_src(52))
         
+        seed_map.split_mappings()
+
     def test_seed_soil(self):
         self.assertEqual(81, seed_map.seed_to_soil(79))
 
@@ -68,8 +70,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(86, seed_map.seed_to_loc(55))
         self.assertEqual(35, seed_map.seed_to_loc(13))
         
-    # def test_seed_min_location(self):
-    #     self.assertEqual(46, seed_map.seed_with_lowest_location())
+    def test_seed_min_location(self):
+        self.assertEqual(46, seed_map.seed_with_lowest_location())
         
 
 
