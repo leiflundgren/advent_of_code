@@ -8,6 +8,7 @@ class Mapping:
         
     def add_mapping(self, dest:int, source:int, len:int):
         self.mappings.append( self.Mapping(dest, source, len) )
+        return self
     
     def find_src(self, src:int):
         for m in self.mappings:
@@ -21,7 +22,7 @@ class Mapping:
                 return m
         return None
             
-    def lookup_src(self, n:int) -> int :
+    def src_to_dst(self, n:int) -> int :
         m = self.find_src(n)
         if m is None:
             return n
@@ -30,7 +31,7 @@ class Mapping:
         return m.dst+offset
     
 
-    def lookup_dst(self, n:int) -> int :
+    def dst_to_src(self, n:int) -> int :
         m = self.find_dst(n)
         if m is None:
             return n
