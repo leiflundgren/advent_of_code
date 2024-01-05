@@ -1,10 +1,11 @@
 
 
-from pathlib import Path
 import os
 
+from pathlib import Path
 from mapping import Mapping
 from seed_map import SeedMap
+import range
 
 seeds = []
 
@@ -23,7 +24,7 @@ input = os.path.join(os.path.dirname(__file__), 'input.txt')
 lines = Path(input).read_text().splitlines()
 
 assert(lines[0].startswith('seeds:'))
-seeds = list(map(int, lines[0][6:].strip().split(' ')))
+seeds = seed.parse_seeds_from_str(lines[0][6:].strip())
 lines = lines[2:]
 
 def lookup_mapping(name):

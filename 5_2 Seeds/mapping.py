@@ -1,5 +1,6 @@
 
 from collections import namedtuple
+from typing import Self
 
 class Mapping:
     def __init__(self):
@@ -39,5 +40,25 @@ class Mapping:
         offset = n-m.dst
         return m.src+offset
     
+    def source_values(self) -> list[int] :
+        return list(map( lambda m: m.src for map in self.mappings))
 
-        
+    def dest_values(self) -> list[int] :
+        return list(map( lambda m: m.dst for map in self.mappings))
+            
+
+    def split_at(self, point : int) -> Self:
+        res = []
+        for m in self.mappings:
+            if m.src <= point and point < m.src + m.len:
+                s0 = m.src
+                d0 = m.dst
+                s1 = point
+                l0 = s1 - s0
+                l1 = m.len - l0
+                d1 = d0 + l0
+                
+                res.append( self.Mapping(d0, s0, l0) )
+                res.append( self.Mapping(d1, s1, l1) )
+            else:
+                res.append(m)
