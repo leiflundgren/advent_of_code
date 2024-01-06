@@ -7,15 +7,15 @@ from mapping import Mapping
 from seed_map import SeedMap
 import range
 
-seeds = []
+seeds = Mapping("seeds")
 
-seed_to_soil = Mapping()
-soil_to_fertilizer = Mapping() 
-fertilizer_to_water = Mapping() 
-water_to_light = Mapping() 
-light_to_temperature = Mapping() 
-temperature_to_humidity = Mapping() 
-humidity_to_location = Mapping() 
+seed_to_soil = Mapping("seed_to_soil")
+soil_to_fertilizer = Mapping("soil_to_fertilizer") 
+fertilizer_to_water = Mapping("fertilizer_to_water") 
+water_to_light = Mapping("water_to_light") 
+light_to_temperature = Mapping("light_to_temperature") 
+temperature_to_humidity = Mapping("temperature_to_humidity") 
+humidity_to_location = Mapping("humidity_to_location") 
 
 
 
@@ -24,7 +24,8 @@ input = os.path.join(os.path.dirname(__file__), 'input.txt')
 lines = Path(input).read_text().splitlines()
 
 assert(lines[0].startswith('seeds:'))
-seeds = seed.parse_seeds_from_str(lines[0][6:].strip())
+for r in range.parse_seeds_from_str(lines[0][6:].strip()):
+    seeds.add_mapping(r.num, r.num, r.len)
 lines = lines[2:]
 
 def lookup_mapping(name):

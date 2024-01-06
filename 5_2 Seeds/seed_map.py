@@ -25,15 +25,7 @@ class SeedMap:
         self.map_light_to_temperature = light_to_temperature
         self.map_temperature_to_humidity = temperature_to_humidity
         self.map_humidity_to_location = humidity_to_location
-        self.maps = [
-            (self.map_seed_to_soil, 'map_seed_to_soil'),
-            (self.map_soil_to_fertilizer, 'map_soil_to_fertilizer'),
-            (self.map_fertilizer_to_water, 'map_fertilizer_to_water'),
-            (self.map_water_to_light, 'map_water_to_light'),
-            (self.map_light_to_temperature, 'map_light_to_temperature'),
-            (self.map_temperature_to_humidity, 'map_temperature_to_humidity'),
-            (self.map_humidity_to_location, 'map_humidity_to_location'),
-        ]
+        self.maps = [ self.map_seeds,             self.map_seed_to_soil,             self.map_soil_to_fertilizer,             self.map_fertilizer_to_water,             self.map_water_to_light,             self.map_light_to_temperature,             self.map_temperature_to_humidity,             self.map_humidity_to_location ]
         
 
     def seed_to_soil(self, seed) -> int:
@@ -41,7 +33,7 @@ class SeedMap:
     
     def seed_to_loc(self, seed) -> int:
         src = seed
-        for (map, name) in self.maps:
+        for map in self.maps:
             dst = map.src_to_dst(src)
             # print(f"{name}[{src}] --> {dst}")
             src = dst
@@ -69,10 +61,19 @@ class SeedMap:
     def split_mappings(self):
         far: Mapping
         near: Mapping
-        for i in range(len(self.maps)-1, 1, -1):
-            far = self.maps[i][0]
-            near = self.maps[i-1][0]
+        for i in range(len(self.maps)-1, 0, -1):
+            far = self.maps[i]
+            near = self.maps[i-1]
+            far_name = far.name
+            near_name = near.name
             
             for dst in far.source_values():
                 src = near.dst_to_src(dst)
                 near.split_at(src)
+            
+            pass
+        self.dump_lengths()
+        
+    def dump_lengths(self):
+        for m in self.maps:
+            print(f'mapping {m.name} has {len(m.mappings)} parts')

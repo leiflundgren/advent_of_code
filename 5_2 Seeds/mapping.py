@@ -3,7 +3,8 @@ from collections import namedtuple
 from typing import Self
 
 class Mapping:
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.Mapping = namedtuple("Mapping", "dst src len")
         self.mappings = []
         
@@ -49,18 +50,36 @@ class Mapping:
 
     def split_at(self, point : int) -> Self:
         res = []
+        splitted = False
+        pre = self.str_ranges()
         for m in self.mappings:
-            if m.src <= point and point < m.src + m.len:
+            # Use < to ignore if m already splits a src
+            if m.src < point and point < m.src + m.len:
                 s0 = m.src
                 d0 = m.dst
                 s1 = point
                 l0 = s1 - s0
                 l1 = m.len - l0
                 d1 = d0 + l0
-                
+
+                if l0 == 0 or l1 == 0: 
+                    bp = 17
                 res.append( self.Mapping(d0, s0, l0) )
                 res.append( self.Mapping(d1, s1, l1) )
+                splitted = True
             else:
                 res.append(m)
-        self.mappings = res
         
+        if splitted:
+            print(f'\nSplitted {self.name}\n' + pre + "\n--------\n" + self.str_ranges())
+            self.mappings = res
+        else:
+            print(f'\nNot-Splitted {self.name}\n' + self.str_ranges())
+
+        
+    def __str__(self):
+        return f'{self.name} map:\r\n' + self.str_ranges()
+
+    def str_ranges(self):
+        return '\n'.join( map(lambda t: f'{t.dst} {t.src} {t.len}', self.mappings))
+    

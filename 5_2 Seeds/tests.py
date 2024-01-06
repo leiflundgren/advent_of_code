@@ -3,39 +3,39 @@ import range
 from mapping import Mapping
 from seed_map import SeedMap
 
-seeds = Mapping() \
+seeds = Mapping("seeds") \
 .add_mapping(79, 79 ,14) \
 .add_mapping(55,55 ,13)
 
-seed_to_soil = Mapping()
+seed_to_soil = Mapping("seed_to_soil")
 seed_to_soil.add_mapping( 50, 98, 2)
 seed_to_soil.add_mapping( 52, 50, 48)
 
-soil_to_fertilizer = Mapping() \
+soil_to_fertilizer = Mapping("soil_to_fertilizer") \
 .add_mapping( 0, 15, 37)\
 .add_mapping( 37, 52, 2)\
 .add_mapping( 39, 0, 15)
 
-fertilizer_to_water = Mapping() \
+fertilizer_to_water = Mapping("fertilizer_to_water") \
 .add_mapping( 49, 53, 8) \
 .add_mapping( 0, 11, 42) \
 .add_mapping( 42, 0, 7) \
 .add_mapping( 57, 7, 4) 
 
-water_to_light = Mapping() \
+water_to_light = Mapping("water_to_light") \
 .add_mapping( 88, 18, 7) \
 .add_mapping( 18, 25, 70)
 
-light_to_temperature = Mapping() \
+light_to_temperature = Mapping("light_to_temperature") \
 .add_mapping( 45, 77, 23) \
 .add_mapping( 81, 45, 19) \
 .add_mapping( 68, 64, 13)
 
-temperature_to_humidity = Mapping() \
+temperature_to_humidity = Mapping("temperature_to_humidity") \
 .add_mapping( 0, 69, 1) \
 .add_mapping( 1, 0, 69)
 
-humidity_to_location = Mapping() \
+humidity_to_location = Mapping("humidity_to_location") \
 .add_mapping( 60, 56, 37) \
 .add_mapping( 56, 93, 4)
 
@@ -45,7 +45,7 @@ seed_map = SeedMap(seeds, seed_to_soil, soil_to_fertilizer,fertilizer_to_water,w
 class Tests(unittest.TestCase):
 
     def test_mappings(self):
-        m = Mapping()
+        m = Mapping('no-name')
         m.add_mapping(50, 98, 2)
         
         self.assertEqual(97, m.src_to_dst(97))
@@ -59,6 +59,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(99, m.dst_to_src(51))
         self.assertEqual(52, m.dst_to_src(52))
         
+        print('---- split')
+        print(str(seed_map.map_humidity_to_location))
         seed_map.split_mappings()
 
     def test_seed_soil(self):
