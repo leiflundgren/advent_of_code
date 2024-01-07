@@ -7,11 +7,18 @@ class Mapping:
         self.name = name
         self.Mapping = namedtuple("Mapping", "dst src len")
         self.mappings = []
-        
+          
     def add_mapping(self, dest:int, source:int, len:int):
         self.mappings.append( self.Mapping(dest, source, len) )
         return self
     
+    def dist_to_next_src(self, n:int):
+        for m in self.mappings:
+            if m.src > n:
+                return m.src-n
+        return None
+        
+
     def find_src(self, src:int):
         for m in self.mappings:
             if m.src <= src and src < m.src+m.len:
@@ -52,6 +59,11 @@ class Mapping:
         res = []
         splitted = False
         pre = self.str_ranges()
+        
+        # m = self.find_src(point)
+        # if not m is None:
+        #     self.mappings.remove(m)
+
         for m in self.mappings:
             # Use < to ignore if m already splits a src
             if m.src < point and point < m.src + m.len:

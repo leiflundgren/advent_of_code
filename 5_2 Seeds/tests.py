@@ -1,3 +1,5 @@
+from math import exp
+from os import access
 import unittest
 import range
 from mapping import Mapping
@@ -41,8 +43,10 @@ humidity_to_location = Mapping("humidity_to_location") \
 
 seed_map = SeedMap(seeds, seed_to_soil, soil_to_fertilizer,fertilizer_to_water,water_to_light,light_to_temperature,                temperature_to_humidity,humidity_to_location ) 
 
-
+    
 class Tests(unittest.TestCase):
+
+        
 
     def test_mappings(self):
         m = Mapping('no-name')
@@ -59,9 +63,54 @@ class Tests(unittest.TestCase):
         self.assertEqual(99, m.dst_to_src(51))
         self.assertEqual(52, m.dst_to_src(52))
         
-        print('---- split')
-        print(str(seed_map.map_humidity_to_location))
-        seed_map.split_mappings()
+        # print('---- split')
+        # print(str(seed_map.map_humidity_to_location))
+        # seed_map.split_mappings()
+
+    def test_find_change_points(self):
+        points = seed_map.change_spots(0)
+        expected = [15, 22, 26, 52, 59, 69, 70, 71, 98]
+        
+        self.assertListEqual(expected, points)
+
+    def test_walker(self):
+        walker = seed_map.create_walkers()
+        
+        while True:
+            try:
+                nxt = walker.find_next_node()
+                if nxt is None: break
+                src_nxt = nxt.src
+                src = nxt.translate_src_to_pre()
+                nxt.next()
+            except StopIteration:
+                pass
+
+    @unittest.skip('debug')
+    def test_dump_matrix(self):
+        def rotate90Clockwise(m):
+            res = []
+            for y in range(0, len(m)):
+                for x in range(0, len(m[x])):
+                    res[y, x] = m[x, y]
+ 
+        # Function to print the matrix
+        def printMatrix(m):
+            for line in m:
+                for col in line:
+                    if isinstance(col, int):
+                        print('{:2d}'.format(col), end=' ')
+                    else:
+                        print(col, end=' ')
+                print()
+
+
+        matrix = seed_map.create_debug_matrix(0, 99, True)
+        # rotate90Clockwise(matrix)
+        printMatrix(matrix)
+        # print(*matrix, sep='\n')
+        
+
 
     def test_seed_soil(self):
         self.assertEqual(81, seed_map.seed_to_soil(79))

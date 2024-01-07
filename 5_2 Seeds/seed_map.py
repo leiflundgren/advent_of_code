@@ -1,6 +1,7 @@
-from typing import cast
+from typing import Iterable, cast
 from range import Range
 from mapping import Mapping
+from node_walker import NodeWalker
 
 def namestr(obj, namespace = None):
     if namespace is None: namespace = globals()
@@ -77,3 +78,56 @@ class SeedMap:
     def dump_lengths(self):
         for m in self.maps:
             print(f'mapping {m.name} has {len(m.mappings)} parts')
+            
+    def create_walkers(self) -> NodeWalker :
+        def recurse(it : Iterable[Mapping]) -> NodeWalker:
+            try:
+                mapping = next(it)
+            except StopIteration:
+                return None
+            nxt = recurse(it)
+            nw = NodeWalker(mapping, nxt)
+            if not nxt is None:
+                nxt.pre = nw
+            return nw
+        length = len(self.maps)
+        return recurse(iter(self.maps))
+
+    def create_debug_matrix(self, begin, end, headers):
+        
+        res = []
+        if headers:
+            res.append(list(map(lambda m: m.name , self.maps)))
+        for i in range(begin, end):
+            src = i
+            line = []
+            for m in self.maps:
+                dst = m.src_to_dst(src)
+                src = dst
+                line.append(dst)
+            res.append(line)
+        return res
+
+    def dist_to_next_change(self, n:int) -> int:
+        min_dist = 0x7fffffff
+        src = n
+        for m in self.maps:
+            
+            dist = m.next_src(src)
+            if dist is None: continue
+            min_dist = min(min_dist, dist)
+            
+            dst = m.
+
+        return min_dist
+    
+    def change_spots(self, start:int) -> list[int] :
+        points = []
+        p = start
+        while True:
+            p = self.next_change(p)
+            if p == 0x7fffffff:
+                break
+            points.append(p)
+        return points
+        
