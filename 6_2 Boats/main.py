@@ -8,10 +8,7 @@ import race
 # Distance:   213   1168   1086   1248
 
 races = race.Races()\
-    .add_race(race.Race(35, 213))  \
-    .add_race(race.Race(69, 1168)) \
-    .add_race(race.Race(68, 1086)) \
-    .add_race(race.Race(87, 1248)) \
+    .add_race(race.Race(35696887, 213116810861248))
 
 
 
@@ -23,4 +20,4 @@ sum = 1
 for best_ls in best_loadtimes:
     sum *= len(best_ls)
 
-print('posibilites:', sum) # 170000
+print('posibilites:', sum) # 
