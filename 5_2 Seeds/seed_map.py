@@ -47,10 +47,10 @@ class SeedMap:
 
         for m in self.map_seeds.mappings:
             loc0 = self.seed_to_loc(m.src)
-            loc1 = self.seed_to_loc(m.src + m.len)
+            loc1 = self.seed_to_loc(m.src + m.cnt)
             
             if loc0 < min_dist or loc1 < min_dist:
-                print(f'Range {m.src}--{m.src+m.len} gives {loc0}/{loc1} which is lower than {min_dist}')
+                print(f'Range {m.src}--{m.src+m.cnt} gives {loc0}/{loc1} which is lower than {min_dist}')
                 for s in range(loc0, loc1):
                     loc = self.seed_to_loc(s)
                     print(f'seed {s} --> loc {loc}')
@@ -59,9 +59,26 @@ class SeedMap:
         
         return min_dist
     
+    def seed_with_lowest_location2(self, changes: list[int]) -> int:
+        min_dist = 0x7fffffff
+
+        for point in changes:
+            
+            loc = self.seed_to_loc(point)
+            
+            if loc < min_dist:
+                print(f'seed {point} --> loc {loc} which is lower than {min_dist}')
+                min_dist = loc
+        
+        return min_dist
+    def add_missing_holes(self):
+        for m in self.maps:
+            m.add_missing_holes()
+
     def split_mappings(self):
         far: Mapping
         near: Mapping
+        
         for i in range(len(self.maps)-1, 0, -1):
             far = self.maps[i]
             near = self.maps[i-1]
@@ -71,7 +88,7 @@ class SeedMap:
             for dst in far.source_values():
                 src = near.dst_to_src(dst)
                 near.split_at(src)
-            
+                
             pass
         self.dump_lengths()
         
@@ -108,26 +125,54 @@ class SeedMap:
             res.append(line)
         return res
 
-    def dist_to_next_change(self, n:int) -> int:
-        min_dist = 0x7fffffff
-        src = n
-        for m in self.maps:
+    # def dist_to_next_change(self, n:int) -> int:
+    #     min_dist = 0x7fffffff
+    #     src = n
+    #     for m in self.maps:
             
-            dist = m.next_src(src)
-            if dist is None: continue
-            min_dist = min(min_dist, dist)
+    #         dist = m.dist_to_next_src(src)
+    #         if dist is None: continue
+    #         min_dist = min(min_dist, dist)
             
-            dst = m.
+    #         dst = m.
 
-        return min_dist
+    #     return min_dist
     
     def change_spots(self, start:int) -> list[int] :
-        points = []
-        p = start
-        while True:
-            p = self.next_change(p)
-            if p == 0x7fffffff:
-                break
-            points.append(p)
-        return points
+        # from https://stackoverflow.com/a/74101104/25961
+        def merge(a: list[int], b: list[int]) -> list[int]:
+            # append, avoid duplicates
+            def append(ls: list[int], itm: int):
+                if len(ls) == 0 or ls[-1] != itm:
+                    ls.append(itm)
+            i, j = 0, 0
+            a_len, b_len = len(a), len(b)
+            output_length = a_len + b_len
+            out = list()
+            for _ in range(output_length):
+                if i < a_len and j < b_len and a[i] < b[j]:
+                    append(out, a[i])
+                    i = i + 1
+                elif j < b_len:
+                    append(out, b[j])
+                    j = j + 1
+    
+            while (i < a_len):
+                append(out, a[i])
+                i += 1
+    
+            while (j < b_len):
+                append(out, b[j])
+                j += 1
+        
+            return out
+        
+        changes : list[int] = []
+        for m in reversed(self.maps):
+            translated = m.translate_dst_to_src(changes)
+            sources = list(map(lambda m: m.src, m.mappings))
+            changes  = merge(translated, sources)
+        return changes
+    
+    pass # end of class
         
