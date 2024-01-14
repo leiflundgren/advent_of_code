@@ -2,64 +2,25 @@
 
 import os
 
-from pathlib import Path
-from mapping import Mapping
-from seed_map import SeedMap
-import range
+import race
 
-seeds = Mapping("seeds")
+# Time:        35     69     68     87
+# Distance:   213   1168   1086   1248
 
-seed_to_soil = Mapping("seed_to_soil")
-soil_to_fertilizer = Mapping("soil_to_fertilizer") 
-fertilizer_to_water = Mapping("fertilizer_to_water") 
-water_to_light = Mapping("water_to_light") 
-light_to_temperature = Mapping("light_to_temperature") 
-temperature_to_humidity = Mapping("temperature_to_humidity") 
-humidity_to_location = Mapping("humidity_to_location") 
+races = race.Races()\
+    .add_race(race.Race(35, 213))  \
+    .add_race(race.Race(69, 1168)) \
+    .add_race(race.Race(68, 1086)) \
+    .add_race(race.Race(87, 1248)) \
 
 
 
+best_loadtimes = []
+for r in races.races:
+    best_loadtimes.append(r.find_loadtimes_better_than(r.mindist))
 
-input = os.path.join(os.path.dirname(__file__), 'input.txt')
-lines = Path(input).read_text().splitlines()
+sum = 1
+for best_ls in best_loadtimes:
+    sum *= len(best_ls)
 
-assert(lines[0].startswith('seeds:'))
-for r in range.parse_seeds_from_str(lines[0][6:].strip()):
-    seeds.add_mapping(r.num, r.num, r.len)
-lines = lines[2:]
-
-def lookup_mapping(name):
-    if name == 'seed-to-soil': return seed_to_soil;
-    if name == 'soil-to-fertilizer': return soil_to_fertilizer
-    if name == 'fertilizer-to-water': return fertilizer_to_water
-    if name == 'water-to-light': return water_to_light
-    if name == 'light-to-temperature': return light_to_temperature
-    if name == 'temperature-to-humidity': return temperature_to_humidity
-    if name == 'humidity-to-location': return humidity_to_location
-    raise ValueError('Unknown name ' + name)
-
-m : Mapping = None
-for l in lines:
-    if len(l) == 0:
-        continue
-    
-    # seed-to-soil map:
-    map = l.find('map:')
-    if map > 0:
-        name = l[0:map-1]
-        m = lookup_mapping(name)
-        continue
-    
-    # 1383244180 2567207479 366571891
-    num = l.strip().split(' ')
-    m.add_mapping(int(num[0]), int(num[1]), int(num[2]))
-
-
-seed_map = SeedMap(seeds, seed_to_soil, soil_to_fertilizer,fertilizer_to_water,water_to_light,light_to_temperature,                temperature_to_humidity,humidity_to_location ) 
-    
-
-changes = seed_map.change_spots(0)
-changes_within = seed_map.map_seeds.points_within_some_range(changes)
-loweest_from_seeds = seed_map.seed_with_lowest_location2(changes_within)
-
-print('min loc:', loweest_from_seeds) # 52210644
+print('posibilites:', sum) # 
