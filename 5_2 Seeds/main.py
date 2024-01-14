@@ -38,7 +38,7 @@ def lookup_mapping(name):
     if name == 'humidity-to-location': return humidity_to_location
     raise ValueError('Unknown name ' + name)
 
-m = Mapping()
+m : Mapping = None
 for l in lines:
     if len(l) == 0:
         continue
@@ -56,5 +56,10 @@ for l in lines:
 
 
 seed_map = SeedMap(seeds, seed_to_soil, soil_to_fertilizer,fertilizer_to_water,water_to_light,light_to_temperature,                temperature_to_humidity,humidity_to_location ) 
+    
 
-print('min loc:', seed_map.seed_with_lowest_location())    
+changes = seed_map.change_spots(0)
+changes_within = seed_map.map_seeds.points_within_some_range(changes)
+loweest_from_seeds = seed_map.seed_with_lowest_location2(changes_within)
+
+print('min loc:', loweest_from_seeds) # 52210644
