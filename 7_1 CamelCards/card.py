@@ -23,6 +23,12 @@ card_types = [
     Card('2', 1),
 ]
 
+card_dict = dict(map(lambda c: (c.name, c), card_types))
+
+def parse_cards(str_cards:str) -> list[Card] :
+    return list(map(lambda chr: card_dict[chr], str_cards))
+        
+
 class HandType:
     def __init__(self, name, value):
         self.name = name
@@ -68,7 +74,7 @@ class Cards:
         return list(sorted(cards, key=lambda c: c.value))
     
     @staticmethod
-    def identity_hand_type(counted_cards : list(int, Card)) -> HandType:
+    def identity_hand_type(counted_cards : list[(int, Card)]) -> HandType:
         if counted_cards[0][0] == 5:
             return ht_fivekind
         elif counted_cards[0][0] == 4:
@@ -82,4 +88,24 @@ class Cards:
         raise ValueError('Got a hand which is nothing')
     
 
-    s
+    @staticmethod
+    def second_comp_greater_than(x : list[Card], y : list[Card]) -> bool:
+        for i in range(len(x)):
+            xi = x[i]
+            yi = y[i]
+            if xi != yi:
+                return xi > yi
+        return False
+            
+class Hand:
+    def __init__(self, cards : list[Card], bid : int):
+        self.cards = cards
+        self.bid = bid
+        
+def parse_hand(str:str) -> Hand:
+    space = str.index(' ')
+    cards = parse_cards(str[:space])
+    bid = int(str[space+1:])
+    return Hand(cards, bid)
+
+        
