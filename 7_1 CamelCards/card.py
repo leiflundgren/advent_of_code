@@ -6,7 +6,18 @@ class Card:
     def __init__(self, name, value):
         self.name = name
         self.value = value
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __hash__(self) -> int:
+        return self.value    
+    def __eq__(self, __value: object) -> bool:
+        return self.value == __value.value
+    def __cmp__(self, other: object) -> int:
+        return self.value - other.value
         
+    
 card_types = [
     Card('A', 14),
     Card('K', 13),
@@ -33,18 +44,6 @@ class HandType:
     def __init__(self, name, value):
         self.name = name
         self.value = value
-
-        
-    def count_types(self, card: list[Card]) -> list[(int, Card)] :
-        dic = {}
-        for c in card:
-            dic[c] = 1 if not dic.has_key(c) else 1 + dic[c]
-        ls = []
-        for c in dic:
-            ls.append((dic[c], c))
-            
-        return list(sorted(ls, key=lambda tup: tup[0]))
-
  
 ht_highcard = HandType('HighCard', 1),
 ht_pair = HandType('Pair', 2),
@@ -65,13 +64,30 @@ hand_types = [
     ht_fivekind,       
 ]
 
-class Cards:
-    def __init__(self):
-        pass        
-
-    @staticmethod
-    def sort(cards : list[Card]) -> list[Card]:
+class Hand:
+    def __init__(self, cards : list[Card], bid : int):
+        self.cards = cards
+        self.bid = bid
+        
+    def sort(self, cards : list[Card]) -> list[Card]:
         return list(sorted(cards, key=lambda c: c.value))
+    
+    def count_types(self) -> list[(int, Card)] :
+        dic = {}
+        for c in self.cards:
+            try:
+                v = dic[c]
+            except KeyError:
+                v = 0
+            dic[c] = 1 + v
+        ls = []
+        for c in dic:
+            ls.append((dic[c], c))
+            
+        return list(sorted(ls, key=lambda tup: -1 * tup[0]))
+
+    def identity_my_hand(self) -> HandType:
+        return Hand.identity_hand_type(self.count_types())
     
     @staticmethod
     def identity_hand_type(counted_cards : list[(int, Card)]) -> HandType:
@@ -88,7 +104,6 @@ class Cards:
         raise ValueError('Got a hand which is nothing')
     
 
-    @staticmethod
     def second_comp_greater_than(x : list[Card], y : list[Card]) -> bool:
         for i in range(len(x)):
             xi = x[i]
@@ -96,16 +111,12 @@ class Cards:
             if xi != yi:
                 return xi > yi
         return False
-            
-class Hand:
-    def __init__(self, cards : list[Card], bid : int):
-        self.cards = cards
-        self.bid = bid
-        
+
 def parse_hand(str:str) -> Hand:
     space = str.index(' ')
     cards = parse_cards(str[:space])
     bid = int(str[space+1:])
     return Hand(cards, bid)
 
-        
+
+
