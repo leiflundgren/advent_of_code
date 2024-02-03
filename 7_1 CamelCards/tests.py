@@ -20,9 +20,13 @@ class Tests(unittest.TestCase):
         hands = create_hands()
         self.assertEqual(765, hands[0].bid)
         self.assertEqual('3', hands[0].cards[0].name)
-        hand_type = hands[0].identity_my_hand()
+        hand_type = hands[0].identify_my_hand()
         self.assertEqual(card.ht_pair, hand_type)
 
+        self.assertEqual(28, hands[2].bid)
+        self.assertEqual('K', hands[2].cards[0].name)        
+        hand_type = hands[2].identify_my_hand()
+        self.assertEqual(card.ht_twopair, hand_type)
     
 
 

@@ -41,17 +41,19 @@ def parse_cards(str_cards:str) -> list[Card] :
         
 
 class HandType:
-    def __init__(self, name, value):
+    def __init__(self, name:str, value:int):
         self.name = name
         self.value = value
+    def __str__(self) -> str:
+        return self.name
  
-ht_highcard = HandType('HighCard', 1),
-ht_pair = HandType('Pair', 2),
-ht_twopair = HandType('TwoPair', 3),
-ht_threekind = HandType('ThreeOfKind', 4),
-ht_house = HandType('FullHouse', 5),
-ht_fourkind = HandType('FourOfKind', 6),
-ht_fivekind = HandType('FiveOfKind', 7),    
+ht_highcard = HandType('HighCard', 1)
+ht_pair = HandType('Pair', 2)
+ht_twopair = HandType('TwoPair', 3)
+ht_threekind = HandType('ThreeOfKind', 4)
+ht_house = HandType('FullHouse', 5)
+ht_fourkind = HandType('FourOfKind', 6)
+ht_fivekind = HandType('FiveOfKind', 7)    
     
 
 hand_types = [
@@ -69,16 +71,19 @@ class Hand:
         self.cards = cards
         self.bid = bid
         
-    def sort(self, cards : list[Card]) -> list[Card]:
+
+    def identify_my_hand(self) -> HandType:
+        return Hand.identify_hand(self.cards)
+
+    @staticmethod
+    def sort(cards : list[Card]) -> list[Card]:
         return list(sorted(cards, key=lambda c: c.value))
-    
-    def count_types(self) -> list[(int, Card)] :
+
+    @staticmethod
+    def count_types(cards : list[Card]) -> list[(int, Card)] :
         dic = {}
-        for c in self.cards:
-            try:
-                v = dic[c]
-            except KeyError:
-                v = 0
+        for c in cards:
+            v = dic.get(c, 0)
             dic[c] = 1 + v
         ls = []
         for c in dic:
@@ -86,11 +91,10 @@ class Hand:
             
         return list(sorted(ls, key=lambda tup: -1 * tup[0]))
 
-    def identity_my_hand(self) -> HandType:
-        return Hand.identity_hand_type(self.count_types())
     
     @staticmethod
-    def identity_hand_type(counted_cards : list[(int, Card)]) -> HandType:
+    def identify_hand(cards : list[Card]) -> HandType:
+        counted_cards : list[(int, Card)] = Hand.count_types(cards)
         if counted_cards[0][0] == 5:
             return ht_fivekind
         elif counted_cards[0][0] == 4:
@@ -98,7 +102,7 @@ class Hand:
         elif counted_cards[0][0] == 3 and counted_cards[1][0] == 2:
             return ht_house
         elif counted_cards[0][0] == 2:
-            return ht_pair
+            return ht_twopair if counted_cards[1][0] == 2 else ht_pair
         elif counted_cards[0][0] == 1:
             return ht_highcard
         raise ValueError('Got a hand which is nothing')
