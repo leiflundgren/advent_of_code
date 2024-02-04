@@ -1,23 +1,22 @@
-
-
 import os
-
-import race
-
-# Time:        35     69     68     87
-# Distance:   213   1168   1086   1248
-
-races = race.Races()\
-    .add_race(race.Race(35696887, 213116810861248))
+import  card
+from pathlib import Path
+import time
 
 
+t0 = time.perf_counter()
 
-best_loadtimes = []
-for r in races.races:
-    best_loadtimes.append(r.find_loadtimes_better_than(r.mindist))
+input = os.path.join(os.path.dirname(__file__), 'input.txt')
+lines = Path(input).read_text().splitlines()
 
-sum = 1
-for best_ls in best_loadtimes:
-    sum *= len(best_ls)
+hands = list(map(lambda s: card.parse_hand(s), lines))
 
-print('posibilites:', sum) # 
+t1 = time.perf_counter()
+
+card.rank_hands(hands)
+winnings = card.sum_winnings(hands) # 250120186
+
+t2 = time.perf_counter()
+print(f'winnings:{winnings}  dt1:{t1-t0}  dt2:{(t2-t1)}')
+
+
