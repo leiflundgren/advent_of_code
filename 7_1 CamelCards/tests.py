@@ -38,7 +38,21 @@ class Tests(unittest.TestCase):
         self.assertEqual('Q', hands[4].cards[0].name)        
         self.assertEqual(card.ht_threekind, hands[4].hand_type)
 
- 
+        sorted_hands = card.sort_hands(hands)
+        print("Sorted:")
+        for hand in sorted_hands:
+            print(hand)
+
+        print()
+        print("Ranked:")
+        card.rank_hands(hands)
+        for hand in hands:
+            winning = hand.rank * hand.bid
+            print(f'{hand} win:{winning}')
+                       
+        winnings = card.sum_winnings(hands)
+        self.assertEqual(6440, winnings)
+
 if __name__ == '__main__':
     unittest.main()
     

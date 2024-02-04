@@ -1,6 +1,10 @@
 
 from enum import Enum
-from typing import Self
+import stat
+from typing import Iterator, Self
+
+import functools
+from weakref import ReferenceType
 
 class Card:
     def __init__(self, name, value):
@@ -9,6 +13,9 @@ class Card:
 
     def __str__(self) -> str:
         return self.name
+
+    def __repr__(self) -> str:
+        return f'Card {self.name}'
 
     def __hash__(self) -> int:
         return self.value    
@@ -46,7 +53,9 @@ class HandType:
         self.value = value
     def __str__(self) -> str:
         return self.name
- 
+    def __repr__(self) -> str:
+        return self.name
+    
 ht_highcard = HandType('HighCard', 1)
 ht_pair = HandType('Pair', 2)
 ht_twopair = HandType('TwoPair', 3)
@@ -71,7 +80,15 @@ class Hand:
         self.cards = cards
         self.bid = bid
         self.hand_type = Hand.identify_hand(self.cards)
+        self.rank = -1
+        self.card_string = ''.join(map(lambda c:str(c), cards))
 
+    def __str__(self):
+        return f'rank:{self.rank} {self.card_string} {self.hand_type.name}'
+
+    def __repr__(self) -> str:
+        return f'Hand {str(self)}'
+    
     @staticmethod
     def sort(cards : list[Card]) -> list[Card]:
         return list(sorted(cards, key=lambda c: c.value))
@@ -104,13 +121,39 @@ class Hand:
             return ht_highcard
         raise ValueError('Got a hand which is nothing')
     
-
+    @staticmethod
     def second_comp_greater_than(x : list[Card], y : list[Card]) -> bool:
         for (xi, yi) in zip(x, y):
             if xi != yi:
                 return xi > yi
         return False
+    
+def sort_hands_cmp(x : Hand, y:Hand) -> int:
 
+    xv = x.hand_type.value 
+    yv = y.hand_type.value
+    if xv != yv:
+        return xv - yv
+    for (xc, yc) in zip(x.cards, y.cards):
+        if xc.value != yc.value:
+            return xc.value - yc.value
+    return 0
+
+def sort_hands(hands : list[Hand]) -> list[Hand] :
+    return sorted(hands, key=functools.cmp_to_key(sort_hands_cmp))
+
+def rank_hands(hands : list[Card]):
+    sorted_hands = sort_hands(hands)
+    for (hand, rank) in zip(sorted_hands, range(1, 1+len(sorted_hands))):
+        hand.rank = rank
+
+def sum_winnings(hands : list[Hand]) -> int:
+    rank_hands(hands)
+    sum = 0
+    for hand in hands:
+        sum += hand.rank * hand.bid
+    return sum
+        
 def parse_hand(str:str) -> Hand:
     space = str.index(' ')
     cards = parse_cards(str[:space])
