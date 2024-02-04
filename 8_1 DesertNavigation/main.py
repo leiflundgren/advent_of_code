@@ -16,6 +16,6 @@ t1 = time.perf_counter()
 steps = sc.walk_to_end()
 
 t2 = time.perf_counter()
-print(f'steps:{steps}  dt1:{t1-t0}  dt2:{(t2-t1)}')
+print(f'steps:{steps}  dt1:{t1-t0}  dt2:{(t2-t1)}') # 20513
 
 

@@ -40,8 +40,7 @@ class Scenario:
         self.end_pos : Node = None
         
 
-    def __next__(self) -> Node :
-        dir = next(self.directions_iter)
+    def step(self, dir) -> Node :
         if dir == 'L':
             self.pos = self.pos.left
             return self.pos
@@ -55,10 +54,12 @@ class Scenario:
     def walk_to_end(self) -> int:
         steps = 0
         while self.pos != self.end_pos:
+            dir = next(self.directions_iter)
+            
             p0 = self.pos
-            p1 = next(self)
+            p1 = self.step(dir)
             steps=steps+1
-            print(f'{steps}:  {p0.name} --> {p1.name}')
+            print(f'{steps}:  {p0.name} -- {dir} --> {p1.name}')
         return steps
 
 
@@ -86,12 +87,15 @@ def parse_scenario(lines:Iterator[str]) -> Scenario:
         n.right = r
         return n
     
-    lines, second = tee(lines)
-    sc.pos = sc.start_pos = parse_line(next(second))
+    #lines, second = tee(lines)
+    #sc.pos = sc.start_pos = parse_line(next(second))
     for line in lines:
         n = parse_line(line)
-        sc.end_pos = n
+        #sc.end_pos = n
     
+    sc.pos = sc.start_pos = sc.nodes['AAA']
+    sc.end_pos = sc.nodes['ZZZ']
+
     return sc
 
 
