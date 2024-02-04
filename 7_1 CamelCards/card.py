@@ -70,10 +70,7 @@ class Hand:
     def __init__(self, cards : list[Card], bid : int):
         self.cards = cards
         self.bid = bid
-        
-
-    def identify_my_hand(self) -> HandType:
-        return Hand.identify_hand(self.cards)
+        self.hand_type = Hand.identify_hand(self.cards)
 
     @staticmethod
     def sort(cards : list[Card]) -> list[Card]:
@@ -99,8 +96,8 @@ class Hand:
             return ht_fivekind
         elif counted_cards[0][0] == 4:
             return ht_fourkind
-        elif counted_cards[0][0] == 3 and counted_cards[1][0] == 2:
-            return ht_house
+        elif counted_cards[0][0] == 3:
+           return ht_house if counted_cards[1][0] == 2 else ht_threekind
         elif counted_cards[0][0] == 2:
             return ht_twopair if counted_cards[1][0] == 2 else ht_pair
         elif counted_cards[0][0] == 1:
@@ -109,9 +106,7 @@ class Hand:
     
 
     def second_comp_greater_than(x : list[Card], y : list[Card]) -> bool:
-        for i in range(len(x)):
-            xi = x[i]
-            yi = y[i]
+        for (xi, yi) in zip(x, y):
             if xi != yi:
                 return xi > yi
         return False

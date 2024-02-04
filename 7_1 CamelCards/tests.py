@@ -20,15 +20,23 @@ class Tests(unittest.TestCase):
         hands = create_hands()
         self.assertEqual(765, hands[0].bid)
         self.assertEqual('3', hands[0].cards[0].name)
-        hand_type = hands[0].identify_my_hand()
-        self.assertEqual(card.ht_pair, hand_type)
+        self.assertEqual(card.ht_pair, hands[0].hand_type)
+
+        self.assertEqual(684, hands[1].bid)
+        self.assertEqual('T', hands[1].cards[0].name)        
+        self.assertEqual(card.ht_threekind, hands[1].hand_type)
 
         self.assertEqual(28, hands[2].bid)
         self.assertEqual('K', hands[2].cards[0].name)        
-        hand_type = hands[2].identify_my_hand()
-        self.assertEqual(card.ht_twopair, hand_type)
+        self.assertEqual(card.ht_twopair, hands[2].hand_type)
     
+        self.assertEqual(220, hands[3].bid)
+        self.assertEqual('K', hands[3].cards[0].name)        
+        self.assertEqual(card.ht_twopair, hands[3].hand_type)
 
+        self.assertEqual(483, hands[4].bid)
+        self.assertEqual('Q', hands[4].cards[0].name)        
+        self.assertEqual(card.ht_threekind, hands[4].hand_type)
 
  
 if __name__ == '__main__':
