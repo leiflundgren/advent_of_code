@@ -26,6 +26,14 @@ class Node:
         return self.value == __value.value
     def __cmp__(self, other: object) -> int:
         return self.value - other.value
+    
+    def move(self, dir:str) -> Self:
+        if dir == 'L':
+            return self.left
+        elif dir == 'R':
+            return self.right
+        else:
+            raise ValueError(f'Attempt to move in direction "{dir}"')  
 
 
 
@@ -35,21 +43,19 @@ class Scenario:
         self.directions_iter = tools.infinite_iterator(directions)
         
         self.nodes : dict[str, Node] = {}
-        self.pos : Node = None
-        self.start_pos : Node = None
-        self.end_pos : Node = None
+        self.pos : list[Node] = None
+        self.start_pos : list[Node] = None
+        self.end_pos : list[Node] = None
         
+    def nodes_ending_with(self, ending) -> list[Node]:
+        return list(filter(lambda n: n.value.endswith(ending), self.nodes.values()))
+        
+    def at_end_pos(self) -> bool:
+        return self.pos == self.end_pos
 
-    def step(self, dir) -> Node :
-        if dir == 'L':
-            self.pos = self.pos.left
-            return self.pos
-        elif dir == 'R':
-            self.pos = self.pos.right
-            return self.pos
-        else:
-            raise ValueError(f'Attempt to move in direction "{dir}"')
-
+    def step_pos(self, dir:str) -> None:
+        self.pos = list(map(lambda n: n.move(dir), self.pos))
+        return self.pos
 
     def walk_to_end(self) -> int:
         steps = 0
@@ -57,10 +63,19 @@ class Scenario:
             dir = next(self.directions_iter)
             
             p0 = self.pos
-            p1 = self.step(dir)
+            p1 = self.step_pos(dir)
             steps=steps+1
-            print(f'{steps}:  {p0.name} -- {dir} --> {p1.name}')
+            print(f'{steps}:  {Scenario.print_pos(p0)} -- {dir} --> {Scenario.print_pos(p1)}')
         return steps
+
+    def __repr__(self) -> str:
+        return f'Scen {str(self)}'
+    def __str__(self) -> str:
+        return f'pos: [ {Scenario.print_pos(self.pos)} ]'
+    @staticmethod
+    def print_pos(pos_ls : list[Node])->str:
+        return ", ".join(map(lambda n: n.name, pos_ls))
+        
 
 
 def parse_scenario(lines:Iterator[str]) -> Scenario:
@@ -79,7 +94,7 @@ def parse_scenario(lines:Iterator[str]) -> Scenario:
         return n
     
     def parse_line(s:str) -> Node:
-        m = re.search('([A-Z]{3}) = \(([A-Z]{3}), ([A-Z]{3})\)', s)
+        m = re.search('(\w{3}) = \((\w{3}), (\w{3})\)', s)
         n = get_node(m.group(1))
         l = get_node(m.group(2))
         r = get_node(m.group(3))
@@ -93,8 +108,8 @@ def parse_scenario(lines:Iterator[str]) -> Scenario:
         n = parse_line(line)
         #sc.end_pos = n
     
-    sc.pos = sc.start_pos = sc.nodes['AAA']
-    sc.end_pos = sc.nodes['ZZZ']
+    sc.pos = sc.start_pos = sc.nodes_ending_with('A')
+    sc.end_pos = sc.nodes_ending_with('Z')
 
     return sc
 
