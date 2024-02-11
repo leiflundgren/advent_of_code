@@ -1,3 +1,4 @@
+import itertools
 import tools
 from enum import Enum
 import stat
@@ -13,6 +14,7 @@ class Node:
         self.value = name
         self.left = left
         self.right = right
+        self.loop_length = -1
 
     def __str__(self) -> str:
         return f'{self.name} ({str(self.left)}, {str(self.right)})'
@@ -21,24 +23,38 @@ class Node:
         return f'Node {str(self)}'
 
     def __hash__(self) -> int:
-        return self.value    
+        return hash(self.value) 
     def __eq__(self, __value: object) -> bool:
         return self.value == __value.value
     def __cmp__(self, other: object) -> int:
         return self.value - other.value
     
-    def move(self, dir:str) -> Self:
+    def move(self, dir:str, dbg_print:bool = False) -> Self:
+        n = None
         if dir == 'L':
-            return self.left
+            n = self.left
         elif dir == 'R':
-            return self.right
+            n = self.right
         else:
             raise ValueError(f'Attempt to move in direction "{dir}"')  
+        
+        if dbg_print: print(f'{self.name} {dir} --> {n.name}')
+        return n
+    
+    @staticmethod
+    def count_moves_to_ending(n: Self, directions:str, dbg_print:bool = False) -> int:
+        for i in tools.natural_numbers(0):
+            if n.name[-1] == 'Z': return i
+            
+            d = directions[i%len(directions)]
+            nxt = n.move(d, dbg_print)
+            n = nxt
+            
 
 
 
 class Scenario:
-    def __init__(self, directions:str):
+    def __init__(self, directions:str, end_char:str = 'Z'):
         self.directions = directions
         self.directions_iter = tools.infinite_iterator(directions)
         
@@ -46,16 +62,19 @@ class Scenario:
         self.pos : list[Node] = None
         self.start_pos : list[Node] = None
         self.end_pos : list[Node] = None
+        self.end_char = end_char
         
-    def nodes_ending_with(self, ending) -> list[Node]:
-        return list(filter(lambda n: n.value.endswith(ending), self.nodes.values()))
+        self.print_move = False
+        
+    def nodes_ending_with(self, ending, nodes:list[Node] = None) -> list[Node]:
+        if nodes is None: nodes = self.nodes.values()
+        return list(filter(lambda n: n.value.endswith(ending), nodes))
         
     def at_end_pos(self) -> bool:
         return self.pos == self.end_pos
 
-    def step_pos(self, dir:str) -> None:
-        self.pos = list(map(lambda n: n.move(dir), self.pos))
-        return self.pos
+    def move(self, pos: list[Node], dir:str) -> list[Node]:
+        return list(map(lambda n: n.move(dir), pos))
 
     def walk_to_end(self) -> int:
         steps = 0
@@ -63,10 +82,31 @@ class Scenario:
             dir = next(self.directions_iter)
             
             p0 = self.pos
-            p1 = self.step_pos(dir)
+            p1 = self.move(p0, dir)
             steps=steps+1
             print(f'{steps}:  {Scenario.print_pos(p0)} -- {dir} --> {Scenario.print_pos(p1)}')
         return steps
+
+    # def find_loops(self) -> list[int]:
+    #     looped = []
+    #     pos = self.start_pos
+    #     for i, dir in zip(tools.natural_numbers(), self.directions_iter):            
+    #         ends = self.nodes_ending_with(self.end_char, pos)
+    #         for n in ends:
+    #             n.loop_length = i
+                
+    #         looped += ends
+    #         pos = list(itertools.filterfalse(set(ends).__contains__, pos))
+    #         if len(pos) == 0 :
+    #             break
+
+    #         next_pos = list(map(lambda n: n.move(dir, self.print_pos), pos))
+    #         pos = next_pos            
+                          
+    #     return looped
+
+    def find_loops(self, dbg_print:bool = False) -> list[int]:
+        return list(map(lambda n: Node.count_moves_to_ending(n, self.directions, dbg_print), self.start_pos))
 
     def __repr__(self) -> str:
         return f'Scen {str(self)}'
