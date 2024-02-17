@@ -27,14 +27,18 @@ class Tests(unittest.TestCase):
         
         p1 = prog.Predictor(scenario1())
         self.assertEqual(18, p1.next_el)
+        self.assertEqual(-3, p1.prev_el)
 
         p2 = prog.Predictor(scenario2())
         self.assertEqual(28, p2.next_el)
+        self.assertEqual(0, p2.prev_el)
 
         p3 = prog.Predictor(scenario3())
         self.assertEqual(68, p3.next_el)
+        self.assertEqual(5, p3.prev_el)
         
         self.assertEqual(114, p1.next_el+p2.next_el+p3.next_el)
+        self.assertEqual(2, p1.prev_el+p2.prev_el+p3.prev_el)
 
 if __name__ == '__main__':
     unittest.main()

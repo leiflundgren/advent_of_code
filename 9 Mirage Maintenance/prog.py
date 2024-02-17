@@ -32,11 +32,15 @@ def create_derivates(ls:list[int]) -> list[list[int]] :
 def calc_next(all_derivates : list[list[int]] ) -> list[list[int]] :
     all_derivates = deepcopy(all_derivates)
     all_derivates[-1].append(0) # first step
+    all_derivates[-1].insert(0, 0) # first step
     for i in range(len(all_derivates)-2, -1, -1):
         dx_ls = all_derivates[i+1]
         ls = all_derivates[i]
         next_el = ls[-1] + dx_ls[-1]
         ls.append(next_el)
+        
+        prev_el = ls[0] - dx_ls[0]
+        ls.insert(0, prev_el)
     return all_derivates
 
 
@@ -47,6 +51,7 @@ class Predictor:
         self.all_derivates = create_derivates(self.input)
         self.next_ls = calc_next(self.all_derivates)
         self.next_el = self.next_ls[0][-1]
+        self.prev_el = self.next_ls[0][0]
         
     
     
