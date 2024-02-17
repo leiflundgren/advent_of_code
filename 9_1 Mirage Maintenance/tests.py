@@ -21,6 +21,20 @@ class Tests(unittest.TestCase):
         self.assertEqual([0,0,0,0], d2)
 
         self.assertTrue(prog.all_zero(d2))
+        
+        all_derivates = prog.create_derivates(sc1)
+        self.assertEqual(3, len(all_derivates))
+        
+        p1 = prog.Predictor(scenario1())
+        self.assertEqual(18, p1.next_el)
+
+        p2 = prog.Predictor(scenario2())
+        self.assertEqual(28, p2.next_el)
+
+        p3 = prog.Predictor(scenario3())
+        self.assertEqual(68, p3.next_el)
+        
+        self.assertEqual(114, p1.next_el+p2.next_el+p3.next_el)
 
 if __name__ == '__main__':
     unittest.main()
