@@ -1,53 +1,26 @@
 import unittest
-import desert
+import prog
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
-def parse_scenario1():
-    return desert.parse_scenario(iter(
-"""RL
 
-AAA = (BBB, CCC)
-BBB = (DDD, EEE)
-CCC = (ZZZ, GGG)
-DDD = (DDD, DDD)
-EEE = (EEE, EEE)
-GGG = (GGG, GGG)
-ZZZ = (ZZZ, ZZZ)
-""".splitlines()))        
-
-
-def parse_scenario2():
-    return desert.parse_scenario(iter(
-"""LLR
-
-AAA = (BBB, BBB)
-BBB = (AAA, ZZZ)
-ZZZ = (ZZZ, ZZZ)
-""".splitlines()))        
+def scenario1(): return [0, 3, 6, 9, 12, 15]
+def scenario2(): return [1, 3, 6, 10, 15, 21]
+def scenario3(): return [10, 13, 16, 21, 30, 45]
 
 
     
 class Tests(unittest.TestCase):
     def test_basics1(self):
-        sc = parse_scenario1()
-        self.assertEqual('RL', sc.directions)
-        self.assertEqual(7, len(sc.nodes))
-        self.assertEqual('AAA', sc.pos.name)
-        self.assertEqual('AAA', sc.start_pos.name)
-        self.assertEqual('ZZZ', sc.end_pos.name)
-        steps = sc.walk_to_end()
-        self.assertEqual(2, steps)
+        sc1 = scenario1()
 
-    def test_basics2(self):
-        sc = parse_scenario2()
-        self.assertEqual('LLR', sc.directions)
-        self.assertEqual(3, len(sc.nodes))
-        self.assertEqual('AAA', sc.pos.name)
-        self.assertEqual('AAA', sc.start_pos.name)
-        self.assertEqual('ZZZ', sc.end_pos.name)
-        steps = sc.walk_to_end()
-        self.assertEqual(6, steps)
+        d1 = prog.int_derivate(sc1)
+        self.assertEqual([3,3,3,3,3], d1)
+
+        d2 = prog.int_derivate(d1)
+        self.assertEqual([0,0,0,0], d2)
+
+        self.assertTrue(prog.all_zero(d2))
 
 if __name__ == '__main__':
     unittest.main()
