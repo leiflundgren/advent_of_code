@@ -50,9 +50,21 @@ Node = typing.NewType('Node', None)
 class Field:
     def __init__(self, field_matrix : list[list[Node]] = None):
         self.field = field_matrix        
+
+        self.len_Y = (self.field)
+        self.len_X = (self.field[y])
+
+    def assert_coord_valid(self, x, y):
+        assert x >= 0 and y>= 0, f'Coordinate ({x},{y}) outside field'
+        assert self.len_X > x, f'Coordinate ({x},{y}) outside field'
+        assert self.len_Y > y, f'Coordinate ({x},{y}) outside field'
+
     def get(self, x:int, y:int) -> Node:
-        return self.field[y][x]
+        self.assert_coord_valid(x, y)
+        return self.new_method(x, y)
+
     def set(self, x:int, y:int, n:Node) -> None:
+        self.assert_coord_valid(x, y)
         self.field[y][x] = n
         
 
@@ -70,17 +82,60 @@ class Node:
         self.value = value
         self.x = x
         self.y = y
+        self.tag = None
        
-    def left(self) -> Self:
-        assert(self.x > 0)
-        return self.field.get(self.x-1, self.y)
-    
     def __str__(self) -> str:
         return f'Node [{self.x},{self.y}] {self.value}'
 
     def __repr__(self) -> str:
         return f'Node [{self.x},{self.y}] {self.value}'
+    
+    @staticmethod
+    def clear_nodes(ls:list[Self]) -> None:
+        for n in ls:
+            n.tag = None
 
+    def move(self, dir:str) -> Self:
+        if dir == 'N': return self.moveN()
+        if dir == 's': return self.moveS()
+        if dir == 'E': return self.moveE()
+        if dir == 'W': return self.moveW()
+        raise ValueError(f'Innvalid direction {dir}')
+
+    def moveW(self) -> Self:
+        if self.x == 0: return None
+        return self.field.get(self.x-1, self.y)
+    def moveE(self) -> Self:
+        if self.x+1 == self.field.len_X : return None
+        return self.field.get(self.x+1, self.y)
+    def moveN(self) -> Self:
+        if self.y == 0: return None
+        return self.field.get(self.x, self.y-1)
+    def moveS(self) -> Self:
+        if y+1 == self.field.len_Y : return None
+        return self.field.get(self.x, self.y+1)
+
+    def can_move_W(self)->bool:
+        n = self.move_W()
+        return not n is None and can_connect_horizontal(n, self)
+    def can_move_E(self)->bool:
+        n = self.move_E()
+        return not n is None and can_connect_horizontal(self, n)
+    def can_move_N(self)->bool:
+        n = self.move_N()
+        return not n is None and can_connect_vertical(n, self)
+    def can_move_S(self)->bool:
+        n = self.move_S()
+        return not n is None and can_connect_vertical(self, n)
+    
+    def can_move(self, dir:str) -> Self:
+        if dir == 'N': return self.can_move_N()
+        if dir == 's': return self.can_move_S()
+        if dir == 'E': return self.can_move_E()
+        if dir == 'W': return self.can_move_W()
+        raise ValueError(f'Innvalid direction {dir}')
+    
+    
 def ParseField(str_field:str) -> Field:
     lines = str_field.split('\n')
     y_len = len(lines)
@@ -93,3 +148,6 @@ def ParseField(str_field:str) -> Field:
             n = Node(field, p, x, y)
             field.set(x, y, n)
     return field
+
+def find_loop(start:Node) -> list[Node]:
+    pass

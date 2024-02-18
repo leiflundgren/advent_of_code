@@ -4,6 +4,11 @@ from prog import ParseField
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
+# ·····
+# ·┎━┒·
+# ·┃·┃·
+# ·┖━┛·
+# ·····
 
 def scenario1(): return \
 '''.....
@@ -12,8 +17,29 @@ def scenario1(): return \
 .L-J.
 .....'''
 
-def scenario2(): return [1, 3, 6, 10, 15, 21]
-def scenario3(): return [10, 13, 16, 21, 30, 45]
+# ━┖┃┎┒
+# ┒S━┒┃
+# ┖┃┒┃┃
+# ━┖━┛┃
+# ┖┃━┛┎
+def scenario2(): return \
+'''-L|F7
+7S-7|
+L|7||
+-L-J|
+L|-JF'''
+
+# ··┎┒·
+# ·┎┛┃·
+# S┛·┖┒
+# ┃┎━━┛
+# ┖┛···
+def scenario3(): return  \
+'''..F7.
+.FJ|.
+SJ.L7
+|F--J
+LJ...'''
 
 
     
@@ -28,6 +54,16 @@ class Tests(unittest.TestCase):
         self.assertEqual(5, len(field.field))
         self.assertEqual(parse_pipe('7'), field.get(3, 1).value)
 
+    def test_scenario2(self):
+        scenario = scenario2()
+        field = ParseField(scenario)
+        print(str(field))
+        
+    def test_scenario3(self):
+        scenario = scenario3()
+        field = ParseField(scenario)
+        print(str(field))
+        
 if __name__ == '__main__':
     unittest.main()
     
