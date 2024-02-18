@@ -1,4 +1,6 @@
-﻿import typing
+﻿import itertools
+from operator import contains
+import typing
 from xmlrpc.client import TRANSPORT_ERROR
 import tools
 from enum import Enum, StrEnum
@@ -51,8 +53,8 @@ class Field:
     def __init__(self, field_matrix : list[list[Node]] = None):
         self.field = field_matrix        
 
-        self.len_Y = (self.field)
-        self.len_X = (self.field[y])
+        self.len_Y = len(self.field)
+        self.len_X = len(self.field[0])
 
     def assert_coord_valid(self, x, y):
         assert x >= 0 and y>= 0, f'Coordinate ({x},{y}) outside field'
@@ -61,12 +63,14 @@ class Field:
 
     def get(self, x:int, y:int) -> Node:
         self.assert_coord_valid(x, y)
-        return self.new_method(x, y)
+        return self.field[y][x]
 
     def set(self, x:int, y:int, n:Node) -> None:
         self.assert_coord_valid(x, y)
         self.field[y][x] = n
         
+    def all_nodes(self) -> list[Node]:
+        return itertools.chain(self.field)
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -91,57 +95,62 @@ class Node:
         return f'Node [{self.x},{self.y}] {self.value}'
     
     @staticmethod
-    def clear_nodes(ls:list[Self]) -> None:
-        for n in ls:
-            n.tag = None
+    def clear_tags(thing) -> None:
+        if isinstance(thing, Node):
+            thing.tag = None
+        else:
+            for n in thing:
+                Node.clear_tags(n)
 
     def move(self, dir:str) -> Self:
-        if dir == 'N': return self.moveN()
-        if dir == 's': return self.moveS()
-        if dir == 'E': return self.moveE()
-        if dir == 'W': return self.moveW()
+        if dir == 'N': return self.move_N()
+        if dir == 'S': return self.move_S()
+        if dir == 'E': return self.move_E()
+        if dir == 'W': return self.move_W()
         raise ValueError(f'Innvalid direction {dir}')
 
-    def moveW(self) -> Self:
+    def move_W(self) -> Self:
         if self.x == 0: return None
         return self.field.get(self.x-1, self.y)
-    def moveE(self) -> Self:
+    def move_E(self) -> Self:
         if self.x+1 == self.field.len_X : return None
         return self.field.get(self.x+1, self.y)
-    def moveN(self) -> Self:
+    def move_N(self) -> Self:
         if self.y == 0: return None
         return self.field.get(self.x, self.y-1)
-    def moveS(self) -> Self:
-        if y+1 == self.field.len_Y : return None
+    def move_S(self) -> Self:
+        if self.y+1 == self.field.len_Y : return None
         return self.field.get(self.x, self.y+1)
 
     def can_move_W(self)->bool:
         n = self.move_W()
-        return not n is None and can_connect_horizontal(n, self)
+        return not n is None and can_connect_horizontal(n.value, self.value)
     def can_move_E(self)->bool:
         n = self.move_E()
-        return not n is None and can_connect_horizontal(self, n)
+        return not n is None and can_connect_horizontal(self.value, n.value)
     def can_move_N(self)->bool:
         n = self.move_N()
-        return not n is None and can_connect_vertical(n, self)
+        return not n is None and can_connect_vertical(n.value, self.value)
     def can_move_S(self)->bool:
         n = self.move_S()
-        return not n is None and can_connect_vertical(self, n)
+        return not n is None and can_connect_vertical(self.value, n.value)
     
     def can_move(self, dir:str) -> Self:
         if dir == 'N': return self.can_move_N()
-        if dir == 's': return self.can_move_S()
+        if dir == 'S': return self.can_move_S()
         if dir == 'E': return self.can_move_E()
         if dir == 'W': return self.can_move_W()
         raise ValueError(f'Innvalid direction {dir}')
     
+    def coonnected_neighbors(self) -> list[Self]:
+        valid_dir = list( filter( lambda d: self.can_move(d), 'NSEW'))
+        return list(map( lambda d: self.move(d), valid_dir))
     
 def ParseField(str_field:str) -> Field:
     lines = str_field.split('\n')
     y_len = len(lines)
     x_len = len(lines[0])
-    field = Field()
-    field.field = list(map(lambda _: [None]*x_len, [None]*y_len  ))
+    field = Field(list(map(lambda _: [None]*x_len, [None]*y_len)))
     for y in range(len(lines)):
         for x in range(len(lines[y])):
             p = parse_pipe(lines[y][x])
@@ -150,4 +159,23 @@ def ParseField(str_field:str) -> Field:
     return field
 
 def find_loop(start:Node) -> list[Node]:
-    pass
+    Node.clear_tags(start.field.all_nodes())
+    
+    loop = []
+    n = start
+    while True:
+        loop.append(n)
+        n.tag = True
+        neighbors = n.coonnected_neighbors()
+        # nexts = list(filter(lambda n: not n.tag, neighbors))
+        
+        next_node = next(filter(lambda n: not n.tag, neighbors), None)
+        if next_node is None:
+            if contains(neighbors, start): # has looped
+                break
+            raise ValueError('Could not move away from node ', n)
+        n = next_node
+        
+    return loop
+        
+    
