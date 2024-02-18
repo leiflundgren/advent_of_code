@@ -70,7 +70,8 @@ class Field:
         self.field[y][x] = n
         
     def all_nodes(self) -> list[Node]:
-        return itertools.chain(self.field)
+        #return list(itertools.chain(self.field))
+        return functools.reduce(lambda xs, ys: xs+ys, self.field)
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -79,7 +80,10 @@ class Field:
             return ''.join(map(lambda n: n.value.print_char, ls))
         lines = list(map(y_to_str, self.field))
         return '\n'.join(lines)
-
+    
+    def get_start_pos(self) -> Node:
+        return next(filter(lambda n: n.value == PIPE_START, self.all_nodes()), None)
+    
 class Node:
     def __init__(self, field:Field, value:Pipe, x:int, y:int):
         self.field = field

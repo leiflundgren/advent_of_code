@@ -35,10 +35,16 @@ class Tests(unittest.TestCase):
         self.assertFalse(n11.can_move_N())
         self.assertTrue(n11.can_move_S())
         
+        self.assertEqual(25, len(field.all_nodes()))
+        
+        n = field.get_start_pos()
+        self.assertEqual(None, n)
+        
         loop = find_loop(n11)
         self.assertEqual(8, len(loop))
         self.assertEqual(n11, loop[0])
         self.assertEqual(field.get(3,3), loop[4])
+        self.assertEqual(4, len(loop)/2)
 
     # ━┖┃┎┒
     # ┒S━┒┃
@@ -57,6 +63,9 @@ L|-JF'''
         scenario = scenario2()
         field = ParseField(scenario)
         print(str(field))
+        n = field.get_start_pos()
+        ns = field.get(1,1)
+        self.assertEqual(ns, n)
         
     # ··┎┒·
     # ·┎┛┃·
