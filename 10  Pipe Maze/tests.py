@@ -1,5 +1,5 @@
 ﻿import unittest
-from prog import Field, find_loop, parse_pipe
+from prog import Field, clear_non_loop, find_edge_nodes, find_loop, mark_outside, parse_pipe
 from prog import ParseField
 
 unittest.TestLoader.sortTestMethodsUsing = None
@@ -39,12 +39,19 @@ class Tests(unittest.TestCase):
         
         n = field.get_start_pos()
         self.assertEqual(None, n)
-        
+                
         loop = find_loop(n11)
         self.assertEqual(8, len(loop))
         self.assertEqual(n11, loop[0])
         self.assertEqual(field.get(3,3), loop[4])
         self.assertEqual(4, len(loop)/2)
+
+        edge = find_edge_nodes(field)
+        self.assertEqual(16, len(edge))
+        
+        between1 = field.nodes_between(field.get(1,1), field.get(1,4))
+        self.assertEqual(2, len(between1))
+        
 
     # ━┖┃┎┒
     # ┒S━┒┃
@@ -67,6 +74,11 @@ L|-JF'''
         ns = field.get(1,1)
         self.assertEqual(ns, n)
         
+        loop = find_loop(n)        
+        print('clear_non_loop')
+        print(str(clear_non_loop(field, loop)))
+
+        
     # ··┎┒·
     # ·┎┛┃·
     # S┛·┖┒
@@ -83,6 +95,46 @@ LJ...'''
         field = ParseField(scenario)
         print(str(field))
         
+
+
+    def test_step2_1(self):
+        def gen_scenario(): return \
+'''...........
+.S-------7.
+.|F-----7|.
+.||.....||.
+.||.....||.
+.|L-7.F-J|.
+.|..|.|..|.
+.L--J.L--J.
+...........'''
+
+        def gen_scen2(): return \
+'''..........
+.S------7.
+.|F----7|.
+.||....||.
+.||....||.
+.|L-7F-J|.
+.|..||..|.
+.L--JL--J.
+..........'''
+
+        for scenario in [ gen_scenario(), gen_scen2() ]:
+            field = ParseField(scenario)
+            print(str(field))
+        
+            n = field.get_start_pos()
+            ns = field.get(1,1)
+            self.assertEqual(ns, n)
+
+            loop = find_loop(n)
+
+            print('mark_outside')        
+            outside = mark_outside(field, loop)
+            print(str(outside))
+        
+
 if __name__ == '__main__':
     unittest.main()
     

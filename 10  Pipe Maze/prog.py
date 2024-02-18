@@ -1,4 +1,5 @@
-﻿import itertools
+﻿from collections import deque
+import itertools
 from operator import contains
 import typing
 from xmlrpc.client import TRANSPORT_ERROR
@@ -31,6 +32,8 @@ PIPE_BEND_S_W = Pipe('7', '┒', 'S-W', True, False, False, True) # is a 90-degr
 PIPE_BEND_S_E = Pipe('F', '┎', 'S-E', False, True, False, True) # is a 90-degree bend connecting south and east.
 PIPE_NO_PIPE = Pipe('.', '·', 'empty', False, False, False, False) # is ground; there is no pipe in this tile.
 PIPE_START = Pipe('S', 'S', 'start', None, None, None, None) # is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
+PIPE_OUTSIDE = Pipe('O', 'O', 'outside', False, False, False, False) 
+PIPE_INSIDE = Pipe('I', 'I', 'inside', False, False, False, False) 
 
 ALL_PIPES = [ PIPE_VERTICAL,PIPE_HORIZONTAL,PIPE_BEND_N_E ,PIPE_BEND_N_W ,PIPE_BEND_S_W ,PIPE_BEND_S_E ,PIPE_NO_PIPE ,PIPE_START ]
 
@@ -77,27 +80,45 @@ class Field:
         return self.__str__()
     def __str__(self) -> str:
         def y_to_str(ls: list[Node]) -> str:
-            return ''.join(map(lambda n: n.value.print_char, ls))
+            return ''.join(map(lambda n: str(n), ls))
         lines = list(map(y_to_str, self.field))
         return '\n'.join(lines)
     
     def get_start_pos(self) -> Node:
         return next(filter(lambda n: n.value == PIPE_START, self.all_nodes()), None)
     
+    def nodes_between(self, n1:Node, n2:Node) -> list[Node]:
+        if n1 is n2:
+            return []
+        if n1.x != n2.x and n1.y != n2.y: # only straight lines
+            return []
+        if n1.x == n2.x: # vertical
+            return [ self.get(n1.x, y) for y in range(min(n1.y, n2.y)+1, max(n1.y, n2.y)) ]
+        else: #horizontal
+            return [ self.get(x, n1.y) for x in range(min(n1.x, n2.x)+1, max(n1.x, n2.x)) ]
+            
+    
 class Node:
-    def __init__(self, field:Field, value:Pipe, x:int, y:int):
+    def __init__(self, field:Field, value:Pipe, x:int, y:int, tag = None):
+        assert isinstance(field, Field)
         self.field = field
         self.value = value
         self.x = x
         self.y = y
-        self.tag = None
+        self.tag = tag
        
     def __str__(self) -> str:
-        return f'Node [{self.x},{self.y}] {self.value}'
+        return self.value.print_char
 
     def __repr__(self) -> str:
         return f'Node [{self.x},{self.y}] {self.value}'
     
+    def __eq__(self, __value: object) -> bool:
+        return self.x == __value.x and self.y == __value.y
+
+    def copy(self, field:Field) -> Self:
+        return Node(field, self.value, self.x, self.y, self.tag)
+
     @staticmethod
     def clear_tags(thing) -> None:
         if isinstance(thing, Node):
@@ -154,15 +175,36 @@ def ParseField(str_field:str) -> Field:
     lines = str_field.split('\n')
     y_len = len(lines)
     x_len = len(lines[0])
+    
+    has_outer = all(map(lambda c: c=='.', lines[0]))
+
     field = Field(list(map(lambda _: [None]*x_len, [None]*y_len)))
-    for y in range(len(lines)):
-        for x in range(len(lines[y])):
+    for y in range(y_len):
+        for x in range(x_len):
             p = parse_pipe(lines[y][x])
             n = Node(field, p, x, y)
             field.set(x, y, n)
     return field
 
+def clear_non_loop(orig:Field, loop:list[Node]) -> Field:
+    field = Field(list(map(lambda _: [None]*orig.len_X, [None]*orig.len_Y)))
+    
+    for y in range(orig.len_Y):
+        for x in range(orig.len_X):
+            n = orig.get(x, y)
+            t = str(n.value)
+            c = contains(loop, n)
+            no_pipe = n.value is PIPE_NO_PIPE
+            cond = not no_pipe and not c
+            if not no_pipe and not c:
+                n = Node(field, PIPE_NO_PIPE, x, y)
+            else:
+                n = n.copy(field)
+            field.set(x, y, n)
+    return field
+
 def find_loop(start:Node) -> list[Node]:
+    assert isinstance(start, Node)
     Node.clear_tags(start.field.all_nodes())
     
     loop = []
@@ -182,4 +224,30 @@ def find_loop(start:Node) -> list[Node]:
         
     return loop
         
+def find_edge_nodes(field:Field) -> list[Node]:    
+    edge = []
+    for x in range(field.len_X):
+        edge.append(field.get(x, 0))
+        edge.append(field.get(x, field.len_Y-1))
+    for y in range(1, field.len_Y-1):
+        edge.append(field.get(0, y))
+        edge.append(field.get(field.len_X-1, y))
+
+    return edge      
+
+def path_between(n1:Node, n2:Node) -> bool:
+    pass
+
+def mark_outside(field:Field, loop:list[Node]) -> Field:
+    field = clear_non_loop(field, loop)
+   
+    edge = find_edge_nodes(field)
     
+    nodes = deque(edge)
+    while len(nodes) > 0:
+        n = nodes.pop()
+        if n.value == PIPE_NO_PIPE:
+            n.value = PIPE_OUTSIDE
+    
+    no_pipes = deque(filter(lambda n: n.value == PIPE_NO_PIPE, field.all_nodes))
+    return field
