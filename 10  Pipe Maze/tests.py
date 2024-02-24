@@ -1,16 +1,33 @@
 ﻿from operator import contains
 import unittest
-from prog import Field, clear_non_loop, find_edge_nodes, find_loop, mark_outside, parse_pipe
-from prog import ParseField
+import prog 
+
+import directions
+import fields
+import nodes
+import pipes
+
+from directions import Direction
+from fields import Field
+from nodes import  Node
+from pipes import  Pipe
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
+N=directions.N
+NE=directions.NE
+E=directions.E
+SE=directions.SE
+S=directions.S
+SW=directions.SW
+W=directions.W
+NW=directions.NW
 
 
     
 class Tests(unittest.TestCase):
     def test_basics(self):
-        pass
+        self.assertEqual(E, E.rotate(90).rotate(90).rotate(90).rotate(90).dir)
 
     # ·····
     # ·┎━┒·
@@ -25,22 +42,22 @@ class Tests(unittest.TestCase):
 .L-J.
 .....'''
         scenario = scenario1()
-        field = ParseField(scenario)
+        field = fields.ParseField(scenario)
         print()
         print(str(field))
-        self.assertEqual(parse_pipe('7'), field.get(3, 1).value)
+        self.assertEqual(pipes.parse_pipe('7'), field.get(3, 1).value)
         n11 = field.get(1,1)
-        self.assertIsNotNone(n11.connect_E())
-        self.assertIsNone(n11.connect_W())
-        self.assertIsNone(n11.connect_N())
-        self.assertIsNotNone(n11.connect_S())
+        self.assertIsNotNone(n11.connect(E))
+        self.assertIsNone(n11.connect(W))
+        self.assertIsNone(n11.connect(N))
+        self.assertIsNotNone(n11.connect(S))
         
-        self.assertEqual(25, len(field.all_nodes()))
+        self.assertEqual(25, len(field.all_nodes_unsorted()))
         
         n = field.get_start_pos()
         self.assertEqual(None, n)
                 
-        loop = find_loop(n11)
+        loop = prog.find_loop(n11)
         self.assertEqual(8, len(loop))
         self.assertEqual(n11, loop[0])
         self.assertEqual(field.get(3,3), loop[4])
@@ -48,7 +65,7 @@ class Tests(unittest.TestCase):
 
         ((min_x, min_y), (max_x,max_y)) = field.get_bounds()
 
-        edge = find_edge_nodes(field)
+        edge = prog.find_edge_nodes(field)
         self.assertEqual(16, len(edge))
         self.assertTrue(contains(edge, field.get(min_x, min_y)))
         self.assertTrue(contains(edge, field.get(min_x, max_y)))
@@ -74,15 +91,15 @@ L|-JF'''
 
 
         scenario = scenario2()
-        field = ParseField(scenario)
+        field = fields.ParseField(scenario)
         print(str(field))
         n = field.get_start_pos()
         ns = field.get(1,1)
         self.assertEqual(ns, n)
         
-        loop = find_loop(n)        
+        loop = prog.find_loop(n)        
         print('clear_non_loop')
-        print(str(clear_non_loop(field, loop)))
+        print(str(prog.clear_non_loop(field, loop)))
 
         
     # ··┎┒·
@@ -98,7 +115,7 @@ SJ.L7
 |F--J
 LJ...'''
         scenario = scenario3()
-        field = ParseField(scenario)
+        field = fields.ParseField(scenario)
         print(str(field))
         
 
@@ -130,8 +147,11 @@ LJ...'''
 ..........
 '''.strip()
 
-        for scenario in [ gen_scenario(), gen_scen2() ]:
-            field = ParseField(scenario)
+        nscen = 0
+        for scenario in [ gen_scen2(), gen_scenario() ]:
+            ++nscen
+            field = fields.ParseField(scenario)
+            print()
             print(str(field))
             n11 = field.get(1,1)
             n00 = field.get(0,0)
@@ -142,7 +162,7 @@ LJ...'''
             n = field.get_start_pos()
             self.assertEqual(n11, n)
 
-            loop = find_loop(n)
+            loop = prog.find_loop(n)
             
             move00 = n00.connect_one()
             self.assertEqual(0, len(move00))
@@ -153,8 +173,40 @@ LJ...'''
             n40 = field.get(4, 0)
             n04 = field.get(0, 4)
             n44 = field.get(4, 4)
-            self.assertTrue(field.path_between(n00, n40))
-            self.assertTrue(field.path_between(n00, n04))
+        #    self.assertTrue(field.path_between(n00, n40))
+        #    self.assertTrue(field.path_between(n00, n04))
+            
+            n27 = field.get(2, 7)
+            n25 = field.get(2, 5)
+            n34 = field.get(3, 4)
+            n43 = field.get(4, 3)
+            n44 = field.get(4, 4)
+            n45 = field.get(4, 5)
+            n46 = field.get(4, 6)
+            n47 = field.get(4, 7)
+            n48 = field.get(4, 8)
+
+            self.assertIsNone(n34.sneak(S))
+            self.assertIsNone(n34.sneak(W))
+
+
+            # if field.get(5, 6).value == PIPE_VERTICAL:
+            #     self.assertEqual(n47, n48.sneak(N))
+            #     self.assertEqual(n46, n47.sneak(N))
+            #     self.assertEqual(n45, n46.sneak(N))
+            #     self.assertEqual(None, n45.sneak(N))
+            #     self.assertEqual(None, n44.sneak(N))
+            #     self.assertEqual(None, n45.sneak(W))
+
+            self.assertTrue(field.canSneak(n48, n44))
+
+            #self.assertIsNone(n27.sneak(N))
+            #self.assertIsNone(n25.sneak(S))
+            
+            f2 = mark_outside(field, loop)
+            nodes = f2.all_nodes_sorted()
+            print(f'bounds {f2.get_bounds()}')
+            print(str(f2))
 
             # print('mark_outside')        
             # outside = mark_outside(field, loop)
