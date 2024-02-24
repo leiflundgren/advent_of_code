@@ -13,6 +13,23 @@ from itertools import tee
 import functools
 from copy import deepcopy
 
+
+def direction(p1:tuple[int,int], p2:tuple[int,int]) -> str:
+    (x1, y1) = p1
+    (x2, y2) = p2
+    if y1 != y2:
+        return 'N' if y1 > y2 else 'S'
+    if x1 != x2:
+        return 'S' if x1 > x2 else 'E'
+    raise ValueError(f'Innvalid direction {p1}->{p2}')
+
+def opposite_direction(dir:str) -> bool :
+    if dir == 'N': return 'S'
+    if dir == 'S': return 'N'
+    if dir == 'E': return 'W'
+    if dir == 'W': return 'E'
+
+
 class Pipe:
     def __init__(self, parse_char:str, print_char:str, name:str, has_pipe:bool, has_W:bool, has_E:bool, has_N:bool, has_S:bool):
         self.parse_char = parse_char
@@ -27,12 +44,24 @@ class Pipe:
     def __repr__(self) -> str:
         return self.print_char
     
-    def has_direction(self, dir:str) -> bool :
-        if dir == 'N': return self.has_N
-        if dir == 'S': return self.has_S
-        if dir == 'E': return self.has_E
-        if dir == 'W': return self.has_W
-        raise ValueError(f'Innvalid direction {dir}')
+    def has_direction(self, dir:str) -> bool :        
+        def inner():
+            if dir == 'N': return self.has_N
+            if dir == 'S': return self.has_S
+            if dir == 'E': return self.has_E
+            if dir == 'W': return self.has_W
+            raise ValueError(f'Innvalid direction {dir}')
+        
+        has = inner()
+        return has is None or has # None is wildcard
+    
+    @staticmethod
+    def directions_connect(p1: Self, p2: Self) -> bool:
+        if p1.x == p2.x and p2.y == p1.y: return False # same nodes
+        if abs(p1.x-p2.x) != 1 or abs(p1.y-p2.y) != 1: return False
+        
+        dir = direction(p1, p2)
+        return p1.has_direction(dir) and p2.has_direction(opposite_direction(dir))
 
 PIPE_VERTICAL = Pipe('|', '┃', 'N-S', True, False, False, True, True) # is a vertical pipe connecting north and south.
 PIPE_HORIZONTAL = Pipe('-', '━', 'W-E', True, True, True, False, False) # is a horizontal pipe connecting east and west.
@@ -155,6 +184,7 @@ class Field:
         else: #horizontal
             return [ self.get(x, n1.y) for x in range(min(n1.x, n2.x)+1, max(n1.x, n2.x)) ]
  
+    # direction to move from n1 to n2
     def direction(self, n1:Node, n2:Node) -> str:
         if n1.x != n2.x and n1.y != n2.y: # only straight lines
             return None 
@@ -164,7 +194,7 @@ class Field:
         if n1.x == n2.x:
             return 'S' if n1.y < n2.y else 'N'
         elif n1.y == n2.y:
-            return 'W' if n1.x < n2.x else 'E'
+            return 'E' if n1.x < n2.x else 'W'
         else: 
             return None
 
@@ -214,6 +244,13 @@ class Node:
         else:
             for n in thing:
                 Node.clear_tags(n)
+
+    def move_coords(self, dir:str) -> Self:
+        if dir == 'N': return (self.x, self.y-1)
+        if dir == 'S': return (self.x, self.y+1)
+        if dir == 'W': return (self.x-1, self.y)
+        if dir == 'E': return (self.x+1, self.y)
+        raise ValueError(f'Innvalid direction {dir}')
 
     def connect(self, dir:str) -> Self:
         if dir == 'N': return self.connect_N()
@@ -273,14 +310,16 @@ class Node:
         return n 
     
     def sneak(self, dir:str) -> Self:
-        # n = self.co
+        (x,y) = self.move_coords(dir)
+        if not self.field.is_inside_bounds(x,y): return None
+        
+        n = self.field.get(x,y)
 
+        if not self.value.has_pipe and not n.value.has_pipe: return n # without pipes, sneak free
 
-        if dir == 'N': return self.sneak_N()
-        if dir == 'S': return self.sneak_S()
-        if dir == 'E': return self.sneak_E()
-        if dir == 'W': return self.sneak_W()
-        raise ValueError(f'Innvalid direction {dir}')
+        if not Pipe.directions_connect(self, n): return None
+
+        return n
 
     def sneak_one(self) -> list[Self]:
         return list(filter(lambda n: not n is None, map(lambda dir: self.sneak(dir), 'NSEW')))

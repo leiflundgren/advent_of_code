@@ -150,9 +150,11 @@ LJ...'''
             move11 = n11.connect_one()
             self.assertTrue(contains(move11, field.get(1, 2)))
             self.assertTrue(contains(move11, field.get(2, 1)))
-
-            # self.assertTrue(field.path_between(field.get(0,0), field.get(4, 0)))
-            # self.assertTrue(field.path_between(field.get(0,0), field.get(0, 4)))
+            n40 = field.get(4, 0)
+            n04 = field.get(0, 4)
+            n44 = field.get(4, 4)
+            self.assertTrue(field.path_between(n00, n40))
+            self.assertTrue(field.path_between(n00, n04))
 
             # print('mark_outside')        
             # outside = mark_outside(field, loop)
