@@ -36,7 +36,7 @@ class Node:
     def __eq__(self, __value: object) -> bool:
         return self.x == __value.x and self.y == __value.y
 
-    def copy(self, field:Field) -> Self:
+    def copy(self, field:Field = None) -> Self:
         return Node(field, self.value, self.x, self.y, self.tag)
 
     def coord(self) -> tuple[int, int] :
@@ -58,6 +58,7 @@ class Node:
         return (self.x + off_x, self.y + off_y)
 
     def move_dir(self,dir:Direction) -> Self:
+        assert not self.field is None, 'Cannot move a node not bound to a field'
         (x,y) = self.coord_dir(dir)
         return self.field.get(x, y)
     
@@ -93,7 +94,7 @@ class Node:
         return list(filter(is_outside_dir, Direction.eight_dir))
     
     # strictly for sneaking between two pipes
-    def sneak(self, dir:Direction) -> Self:
+    def sneak(self, dir:Direction, outsside_dir:Direction) -> Self:
         dir_left = dir.left()
         dir_op = dir_left.left()
         dir_right = dir_op.left()
@@ -121,6 +122,9 @@ class Node:
             if not n_left.value.has_directions(dir_op) and not n_right.value.has_directions(dir_op):
                 return None
         
+        if n.y == 2 and 2 <= n.x and n.x <= 7:
+            bp = 17
+
         return n
         
         # if not self.value.has_pipe:
@@ -165,14 +169,14 @@ class Node:
                 ls.append(n)
         return ls
 
-    def sneak_one(self) -> list[Self]:
+    def sneak_one(self, outside:Direction) -> list[Self]:
         import pipes
         
         outsides = list(filter(lambda n: n.value is pipes.PIPE_OUTSIDE, map(lambda d: self.move_dir(d), Direction.four_dir)))
 
         ls = []
         for dir in Direction.four_dir:
-            n = self.sneak(dir)
+            n = self.sneak(dir, outside)
             if not n is None:
                 if n.x==2 and 2 <= n.y and n.y <= 5:
                     bp =17

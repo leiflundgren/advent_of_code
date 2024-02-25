@@ -1,4 +1,5 @@
-﻿import pipes
+﻿import math
+import pipes
 import typing
 import directions
 
@@ -7,18 +8,24 @@ Node = typing.NewType("Node", None)
 
 class Field:
     
-    def __init__(self, field_matrix : list[list[Node]] = None):
+    def __init__(self, node_iter = None):
         from nodes import Node
+        def add_nodes(iterNodes):
+            if iterNodes is None:
+                pass
+            elif isinstance(iterNodes, Node):
+                self.set(iterNodes)
+            else:
+                for it in iterNodes:
+                    add_nodes(it)
        
         self.field : dict[tuple[int, int], Node] = {}
         
-        if not field_matrix is None:
-            for ls in field_matrix:
-                for n in ls:
-                    if not n is None:
-                        self.set(n.x, n.y, n)
-                        
+        add_nodes(node_iter)
         self.set_bounds()
+        
+    def copy(self):
+        return Field(self.all_nodes_unsorted())
 
     def get(self, x:int, y:int, create_if_not_found=True, store_if_not_found=False) -> Node:
         from nodes import Node
@@ -31,13 +38,14 @@ class Field:
         if n is None and create_if_not_found:
             n = Node(self, pipes.PIPE_NO_PIPE, x, y)
             if store_if_not_found:
-                self.set(x, y, n)                
+                self.set(n)                
         return n
 
-    def set(self, x:int, y:int, n:Node) -> None:
-        self.field[(x, y)] = n
+    def set(self, n:Node) -> None:
+        self.field[n.coord()] = n
+        n.field = self
         self.bounds = None
-    
+            
     def get_bounds(self)  -> tuple[tuple[int, int], tuple[int,int]]:
         if self.bounds is None:
             self.set_bounds()
@@ -77,19 +85,33 @@ class Field:
                 ls.append((x, y))
         return ls
                 
+    # empty nodes are not in dictionary. Fill them
     def fill_empty(self):
+        from nodes import Node
+        
         coords = self.get_all_coords()
         for (x, y) in coords:
-                self.set(x, y, self.get(x, y))
+            self.get(x, y, True, True)
     
 
     def __repr__(self) -> str:
         return self.__str__()
     def __str__(self) -> str:
         def y_to_str(ls: list[Node]) -> str:
-            return ''.join(map(lambda n: str(n), ls))
+            return ''.join(map(lambda n: n.print_char, ls))
+        def magnitude_order(num):
+            if num == 0:
+                return 0
 
+            absnum = abs(num)
+            order = math.log10(absnum)
+            res = math.floor(order)
+
+            return res
+        
         ((min_x, min_y), (max_x,max_y)) = self.get_bounds()
+        width = max_x - min_x + 1
+        height = max_y - min_y + 1
         
         field = []
         for y in range(min_y, 1+max_y):
@@ -102,13 +124,13 @@ class Field:
         # field = line * ylen
         
         for n in self.field.values():
-            field[n.y-min_y][n.x-min_x] = n
+            field[n.y-min_y][n.x-min_x] = n.value
 
         lines = list(map(y_to_str, field))
         for i in range(len(lines)):
-            lines[i] = f'{i} {lines[i]}'
+            lines[i] = f'{i:4} {lines[i]}'
         lines.append('')
-        lines.append('  0123456789')
+        lines.append('  ' + '0123456789'*(width//10))
         return '\n'.join(lines)
     
     def get_start_pos(self) -> Node:
@@ -154,6 +176,15 @@ class Field:
         #     return all(map(lambda n: n.value.has_E or n.value.has_W, between))
         # else:
         #     return all(map(lambda n: n.value.has_N or n.value.has_S, between))
+    # Returns a Node, not added to field
+    def find_start_pipe(self, n:Node) -> pipes.Pipe:
+        should_have_directions = []
+        for dir in directions.Direction.four_dir:
+            op_dir = dir.opposite()
+            nb = n.move_dir(dir)
+            if nb.inside_bounds() and nb.value.has_directions(op_dir):
+                should_have_directions.append(dir)
+        return pipes.from_directions(should_have_directions)
         
 def ParseField(str_field:str) -> Field:
     from nodes import Node
@@ -164,11 +195,11 @@ def ParseField(str_field:str) -> Field:
     
     has_outer = all(map(lambda c: c=='.', lines[0]))
 
-    field = Field(list(map(lambda _: [None]*x_len, [None]*y_len)))
+    field = Field()
     for y in range(y_len):
         for x in range(x_len):
             p = pipes.parse_pipe(lines[y][x])
             n = Node(field, p, x, y)
-            field.set(x, y, n)
+            field.set(n)
     return field
         

@@ -24,6 +24,47 @@ W=directions.W
 NW=directions.NW
 
 
+def gen_scenario(): return ('scen1', \
+'''
+...........
+.S-------7.
+.|F-----7|.
+.||.....||.
+.||.....||.
+.|L-7.F-J|.
+.|..|.|..|.
+.L--J.L--J.
+...........
+'''.strip())
+
+def gen_scen2(): return ('scen2', \
+'''
+..........
+.S------7.
+.|F----7|.
+.||....||.
+.||....||.
+.|L-7F-J|.
+.|..||..|.
+.L--JL--J.
+..........
+'''.strip())
+
+def gen_scen3(): return ('scen3', \
+'''
+.F----7F7F7F7F-7....
+.|F--7||||||||FJ....
+.||.FJ||||||||L7....
+FJL7L7LJLJ||LJ.L-7..
+L--J.L7...LJS7F-7L7.
+....F-J..F7FJ|L7L7L7
+....L7.F7||L7|.L7L7|
+.....|FJLJ|FJ|F7|.LJ
+....FJL-7.||.||||...
+....L---J.LJ.LJLJ...
+'''.strip())
+
+
     
 class Tests(unittest.TestCase):
     def test_basics(self):
@@ -75,6 +116,23 @@ class Tests(unittest.TestCase):
         between1 = field.nodes_between(field.get(1,1), field.get(1,4))
         self.assertEqual(2, len(between1))
         
+        self.assertEqual(pipes.PIPE_VERTICAL, pipes.from_directions([N, S]))
+        self.assertEqual(pipes.PIPE_BEND_N_E, pipes.from_directions([N, E]))
+
+
+    def test_scale_basics(self):
+        field = fields.ParseField(gen_scen2()[1])
+        
+        print('Test scale:')
+        print(field)
+
+        up = prog.tranform_up3(field)
+        print(up)
+
+
+        back = prog.tranform_down3(up)
+        print(back)
+
 
     # ━┖┃┎┒
     # ┒S━┒┃
@@ -120,38 +178,16 @@ LJ...'''
         
 
 
-    def test_step2_1(self):
-        def gen_scenario(): return \
-'''
-...........
-.S-------7.
-.|F-----7|.
-.||.....||.
-.||.....||.
-.|L-7.F-J|.
-.|..|.|..|.
-.L--J.L--J.
-...........
-'''.strip()
 
-        def gen_scen2(): return \
-'''
-..........
-.S------7.
-.|F----7|.
-.||....||.
-.||....||.
-.|L-7F-J|.
-.|..||..|.
-.L--JL--J.
-..........
-'''.strip()
 
+    def test_print_loops(self):
         nscen = 0
-        for scenario in [ gen_scen2(), gen_scenario() ]:
+        for (name, scenario) in [ gen_scen3(), gen_scen2(), gen_scenario() ]:
             ++nscen
             field = fields.ParseField(scenario)
             print()
+            print()
+            print(f'{name}  bounds:{field.get_bounds()}')
             print(str(field))
             n11 = field.get(1,1)
             n00 = field.get(0,0)
@@ -160,10 +196,34 @@ LJ...'''
             
         
             n = field.get_start_pos()
-            self.assertEqual(n11, n)
+            #self.assertEqual(n11, n)
 
             loop = prog.find_loop(n)
             
+            f2 = prog.clear_non_loop(field, loop)
+            
+            print()
+            print()
+            print(f'{name}  bounds: {f2.get_bounds()}')
+            print(str(field))
+
+
+        nscen = 0
+        
+    def test_detaiils_scen_1_2(self):
+
+        for (name, scenario) in [ gen_scen2(), gen_scenario() ]:
+
+            field = fields.ParseField(scenario)
+            print()
+            print()
+            print(f'{name}  bounds:{field.get_bounds()}')
+            print(str(field))
+            n11 = field.get(1,1)
+            n00 = field.get(0,0)
+            n01 = field.get(0,1)
+            n10 = field.get(1,0)
+
             move00 = n00.connect_one()
             self.assertEqual(0, len(move00))
             
@@ -186,8 +246,8 @@ LJ...'''
             n47 = field.get(4, 7)
             n48 = field.get(4, 8)
 
-            self.assertIsNone(n34.sneak(S))
-            self.assertIsNone(n34.sneak(W))
+            self.assertIsNone(n34.sneak(S, E))
+            self.assertIsNone(n34.sneak(W, E))
 
 
             # if field.get(5, 6).value == PIPE_VERTICAL:
@@ -203,16 +263,81 @@ LJ...'''
             #self.assertIsNone(n27.sneak(N))
             #self.assertIsNone(n25.sneak(S))
             
-            f2 = prog.mark_outside(field, loop)
-            nodes = f2.all_nodes_sorted()
-            print(f'bounds {f2.get_bounds()}')
-            print(str(f2))
+            
 
-            # print('mark_outside')        
-            # outside = mark_outside(field, loop)
+            loop = prog.find_loop(field.get_start_pos())
+            
+            scaled = prog.tranform_up3(field)
+            scaled_start = scaled.get_start_pos()
+            self.assertIsNotNone(scaled_start)
+            scaled_loop = prog.find_loop(scaled_start) 
+            
+            self.assertEqual(3*len(loop), len(scaled_loop))
+
+
+            # edge = prog.find_edge_nodes(scaled, 0)
+
+            print(f'{name} edges checked  bounds: {scaled.get_bounds()}')
+            print(str(scaled))
+
+
+            f2 = prog.mark_outside_inside(scaled, scaled_loop)
+            print(f'{name}  bounds: {f2.get_bounds()}')
+            print(str(f2))
+            
+            rescaled = prog.tranform_down3(f2)
+            print(f'{name}-rescaled  bounds: {rescaled.get_bounds()}')
+            print(str(rescaled))
+            
+            inside = prog.count_inside(rescaled)
+            print(f'Inside count is: {inside}')
+
+            # print('mark_outside_inside')        
+            # outside = mark_outside_inside(field, loop)
             # print(str(outside))
         
+    def test_mark_outside_inside_3(self):
+        for (name, scenario) in [ gen_scen3() ]:
 
+
+            field = fields.ParseField(scenario)
+            print()
+            print()
+            print(f'{name}  bounds: {field.get_bounds()}')
+            print(str(field))
+            n11 = field.get(1,1)
+            n00 = field.get(0,0)
+            n01 = field.get(0,1)
+            n10 = field.get(1,0)
+
+         
+            n40 = field.get(4, 0)
+            n04 = field.get(0, 4)
+            n44 = field.get(4, 4)
+        #    self.assertTrue(field.path_between(n00, n40))
+        #    self.assertTrue(field.path_between(n00, n04))
+            
+            n27 = field.get(2, 7)
+            n25 = field.get(2, 5)
+            n34 = field.get(3, 4)
+            n43 = field.get(4, 3)
+            n44 = field.get(4, 4)
+            n45 = field.get(4, 5)
+            n46 = field.get(4, 6)
+            n47 = field.get(4, 7)
+            n48 = field.get(4, 8)
+
+                      
+            loop = prog.find_loop(field.get_start_pos())
+            f2 = prog.mark_outside_inside(field, loop)
+            nodes = f2.all_nodes_sorted()
+            print(f'{name}  bounds: {f2.get_bounds()}')
+            print(str(f2))
+
+            # print('mark_outside_inside')        
+            # outside = mark_outside_inside(field, loop)
+            # print(str(outside))
+            
 if __name__ == '__main__':
     unittest.main()
     

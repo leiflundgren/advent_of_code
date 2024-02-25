@@ -20,8 +20,10 @@ class Pipe:
         self.has_N = has_N
         self.has_S = has_S
             
-    def __repr__(self) -> str:
+    def __strr__(self) -> str:
         return self.print_char
+    def __repr__(self) -> str:
+        return f'pipe {self.name} {self.print_char}'
     
     def has_directions(self, dir_or_iter:str) -> bool :        
         def inner(dir):
@@ -84,3 +86,9 @@ def parse_pipe(c:str) -> Pipe:
         if p.parse_char == c:
             return p
     raise ValueError('Unknown pipe', c)
+
+def from_directions(dirs : list[Direction]) -> Pipe:
+    for p in ALL_PIPES:
+        if p.has_pipe and p.has_directions(dirs):
+            return p
+    return None 

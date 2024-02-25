@@ -14,7 +14,7 @@ from pipes import  Pipe
 def clear_non_loop(orig:Field, loop:list[Node]) -> Field:
     field = Field()    
     for n in loop:
-        field.set(n.x, n.y, n.copy(field))
+        field.set(n.copy(field))
     return field
 
 def find_loop(start:Node) -> list[Node]:
@@ -55,33 +55,40 @@ def find_edge_nodes(field:Field, margin:int = 0) -> list[Node]:
 
 
 
-def mark_outside(field:Field, loop:list[Node]) -> Field:
-    field = clear_non_loop(field, loop)
-   
-    edge = find_edge_nodes(field, 1)
-    for n in field.all_nodes_unsorted():
-        n.tag = None
+def mark_outside_inside(field:Field) -> Field:
     
-    nodes = deque(edge)
-    while len(nodes) > 0:
-        n = nodes.pop()
+    l0 = len(field.field)
+    field.fill_empty()
+    for n in field.all_nodes_unsorted():
+        n.tag = []
+    l1 = len(field.field)
+    
+    edge : list[Node] = []
+    outside : list[Node] = []
+    ((x_min, y_min), (x_max, y_max)) = field.get_bounds()
+    for x in range(x_min, 1+x_max):
+        edge.append(field.get(x, y_min, True, True))
+        edge.append(field.get(x, y_max, True, True))
+    for y in range(y_min, 1+y_max):
+        edge.append(field.get(x_min, y, True, True))
+        edge.append(field.get(x_max, y, True, True))
+
+    for n in edge:
         if n.value == pipes.PIPE_NO_PIPE:
             n.value = pipes.PIPE_OUTSIDE
             n.tag = ['outside']
-            field.set(n.x, n.y, n)
-    
-    no_pipes = deque(filter(lambda n: n.value == pipes.PIPE_NO_PIPE, field.all_nodes_unsorted()))
-    
-    field.fill_empty()
+            outside.append(n)
 
-    nodes = deque(edge)
+    print('trivil outside marked:')
+    print(field)
+    
+    nodes = deque(outside)
     
     while len(nodes) > 0:
         n = nodes.pop()
 
         nexts = n.move_nopipe_one()
-        for nn in nexts:            
-            if nn.tag is None: nn.tag  = []
+        for nn in nexts:
             if contains(nn.tag, 'outside'): continue # been here before
             if contains(nn.tag, 'move'): continue # been here before
             nn.tag.append('move')
@@ -91,21 +98,123 @@ def mark_outside(field:Field, loop:list[Node]) -> Field:
                 nn.value = pipes.PIPE_OUTSIDE
             nodes.append(nn)
 
-        can_sneak_to = n.sneak_one()
-        for nn in can_sneak_to:
-            if 2 <= nn.x and nn.x <= 3 and nn.y == 6:
-                bp = 17
+        # can_sneak_to = n.sneak_one()
+        # for nn in can_sneak_to:
+        #     if 2 <= nn.x and nn.x <= 3 and nn.y == 6:
+        #         bp = 17
                 
-            if nn.tag is None: nn.tag  = []
-            if contains(nn.tag, 'outside'): continue # been here before
-            if contains(nn.tag, 'sneak'): continue # been here before
-            nn.tag.append('move')
+        #     if nn.tag is None: nn.tag  = []
+        #     if contains(nn.tag, 'outside'): continue # been here before
+        #     if contains(nn.tag, 'sneak'): continue # been here before
+        #     nn.tag.append('move')
             
-            nn.tag.append('outside')
+        #     nn.tag.append('outside')
 
-            if nn.value == pipes.PIPE_NO_PIPE:
-                nn.value = pipes.PIPE_OUTSIDE
-            nodes.append(nn)
+        #     if nn.value == pipes.PIPE_NO_PIPE:
+        #         nn.value = pipes.PIPE_OUTSIDE
+        #     nodes.append(nn)
 
+
+    print('filled outside marked:')
+    print(field)
+    
+    for n in field.all_nodes_unsorted():
+        if n.value == pipes.PIPE_NO_PIPE:
+            nn.tag.append('inside')
+            n.value = pipes.PIPE_INSIDE
+    
     return field
 
+def count_inside(field:Field) -> int:
+    return len(list(filter(lambda n: n.value == pipes.PIPE_INSIDE, field.all_nodes_unsorted())))
+
+def tranform_up3(field:Field) -> Field:
+    def transform_node(n:Node, target:Field) -> list[Node]:
+        x = 3*n.x
+        y = 3*n.y
+        nodes = []
+        if n.value is pipes.PIPE_VERTICAL:
+             nodes = [ 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+0), Node(None, pipes.PIPE_VERTICAL, x+1, y+0), Node(None, pipes.PIPE_NO_PIPE, x+2, y+0), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+1), Node(None, pipes.PIPE_VERTICAL, x+1, y+1), Node(None, pipes.PIPE_NO_PIPE, x+2, y+1), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+2), Node(None, pipes.PIPE_VERTICAL, x+1, y+2), Node(None, pipes.PIPE_NO_PIPE, x+2, y+2), 
+             ]
+             
+        elif n.value is pipes.PIPE_HORIZONTAL:
+             nodes = [ 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+0), Node(None, pipes.PIPE_NO_PIPE, x+1, y+0), Node(None, pipes.PIPE_NO_PIPE, x+2, y+0), 
+                 Node(None, pipes.PIPE_HORIZONTAL, x+0, y+1), Node(None, pipes.PIPE_HORIZONTAL, x+1, y+1), Node(None, pipes.PIPE_HORIZONTAL, x+2, y+1), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+2), Node(None, pipes.PIPE_NO_PIPE, x+1, y+2), Node(None, pipes.PIPE_NO_PIPE, x+2, y+2), 
+             ]
+        elif n.value is pipes.PIPE_BEND_N_E:
+              nodes = [ 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+0), Node(None, pipes.PIPE_VERTICAL, x+1, y+0), Node(None, pipes.PIPE_NO_PIPE, x+2, y+0), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+1), Node(None, pipes.PIPE_BEND_N_E, x+1, y+1), Node(None, pipes.PIPE_HORIZONTAL, x+2, y+1), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+2), Node(None, pipes.PIPE_NO_PIPE, x+1, y+2), Node(None, pipes.PIPE_NO_PIPE, x+2, y+2), 
+             ]
+        elif n.value is pipes.PIPE_BEND_N_W:
+              nodes = [ 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+0), Node(None, pipes.PIPE_VERTICAL, x+1, y+0), Node(None, pipes.PIPE_NO_PIPE, x+2, y+0), 
+                 Node(None, pipes.PIPE_HORIZONTAL, x+0, y+1), Node(None, pipes.PIPE_BEND_N_W, x+1, y+1), Node(None, pipes.PIPE_NO_PIPE, x+2, y+1), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+2), Node(None, pipes.PIPE_NO_PIPE, x+1, y+2), Node(None, pipes.PIPE_NO_PIPE, x+2, y+2), 
+             ]
+        elif n.value is pipes.PIPE_BEND_S_W:
+              nodes = [ 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+0), Node(None, pipes.PIPE_NO_PIPE, x+1, y+0), Node(None, pipes.PIPE_NO_PIPE, x+2, y+0), 
+                 Node(None, pipes.PIPE_HORIZONTAL, x+0, y+1), Node(None, pipes.PIPE_BEND_S_W, x+1, y+1), Node(None, pipes.PIPE_NO_PIPE, x+2, y+1), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+2), Node(None, pipes.PIPE_VERTICAL, x+1, y+2), Node(None, pipes.PIPE_NO_PIPE, x+2, y+2), 
+             ]
+        elif n.value is pipes.PIPE_BEND_S_E:
+              nodes = [ 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+0), Node(None, pipes.PIPE_NO_PIPE, x+1, y+0), Node(None, pipes.PIPE_NO_PIPE, x+2, y+0), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+1), Node(None, pipes.PIPE_BEND_S_E, x+1, y+1), Node(None, pipes.PIPE_HORIZONTAL, x+2, y+1), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+2), Node(None, pipes.PIPE_VERTICAL, x+1, y+2), Node(None, pipes.PIPE_NO_PIPE, x+2, y+2), 
+             ]
+        elif n.value is pipes.PIPE_NO_PIPE:
+              nodes = [ 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+0), Node(None, pipes.PIPE_NO_PIPE, x+1, y+0), Node(None, pipes.PIPE_NO_PIPE, x+2, y+0), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+1), Node(None, pipes.PIPE_NO_PIPE, x+1, y+1), Node(None, pipes.PIPE_NO_PIPE, x+2, y+1), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+2), Node(None, pipes.PIPE_NO_PIPE, x+1, y+2), Node(None, pipes.PIPE_NO_PIPE, x+2, y+2), 
+             ]
+        elif n.value is pipes.PIPE_START:
+             nodes = [ 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+0), Node(None, pipes.PIPE_NO_PIPE, x+1, y+0), Node(None, pipes.PIPE_NO_PIPE, x+2, y+0), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+1), Node(None, pipes.PIPE_NO_PIPE, x+1, y+1), Node(None, pipes.PIPE_NO_PIPE, x+2, y+1), 
+                 Node(None, pipes.PIPE_NO_PIPE, x+0, y+2), Node(None, pipes.PIPE_NO_PIPE, x+1, y+2), Node(None, pipes.PIPE_NO_PIPE, x+2, y+2), 
+             ]
+        pass
+ 
+        for n in nodes:
+            old = target.get(n.x, n.y, False)
+            if not old is None:
+                bp = 17
+            target.set(n)
+
+    cpy = field.copy()
+    start_node = cpy.get_start_pos()
+    start_cpy = start_node.copy()
+    start_cpy.value = field.find_start_pipe(start_node)
+    cpy.set(start_cpy)
+
+    scaled = Field()
+    for n in cpy.all_nodes_unsorted():
+        transform_node(n, scaled)
+
+    scaled.set_bounds()
+    scaled.get(1+3*start_cpy.x, 1+3*start_cpy.y).value = pipes.PIPE_START
+    return scaled
+
+def tranform_down3(field:Field) -> Field:
+    def transform_node(n:Node) -> Node:
+        x = n.x//3
+        y = n.y//3
+        return Node(None, n.value, x, y)
+        
+    scaled = Field()
+    ((x_min, y_min), (x_max, y_max)) = field.get_bounds()
+    for y in range(y_min+1, y_max, 3):
+        for x in range(x_min+1, x_max, 3):
+            # x,y is middle on a 9-set of nodes.
+            scaled.set(transform_node(field.get(x, y)))
+            
+    return scaled
