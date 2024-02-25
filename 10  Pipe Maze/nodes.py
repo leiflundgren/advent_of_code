@@ -168,15 +168,13 @@ class Node:
     def sneak_one(self) -> list[Self]:
         import pipes
         
-        outsides = list(filter(lambda n: n.values is pipes.PIPE_OUTSIDE, map(lambda d: self.move_dir(d), Direction.four_dir)))
+        outsides = list(filter(lambda n: n.value is pipes.PIPE_OUTSIDE, map(lambda d: self.move_dir(d), Direction.four_dir)))
 
         ls = []
         for dir in Direction.four_dir:
             n = self.sneak(dir)
             if not n is None:
-                if n.x==2 and n.y == 4:
-                    bp =17
-                if n.x==2 and n.y == 5:
+                if n.x==2 and 2 <= n.y and n.y <= 5:
                     bp =17
                 if n.x==3 and n.y == 5:
                     bp =17

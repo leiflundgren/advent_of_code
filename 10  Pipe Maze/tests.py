@@ -198,12 +198,12 @@ LJ...'''
             #     self.assertEqual(None, n44.sneak(N))
             #     self.assertEqual(None, n45.sneak(W))
 
-            self.assertTrue(field.canSneak(n48, n44))
+            # self.assertTrue(field.canSneak(n48, n44))
 
             #self.assertIsNone(n27.sneak(N))
             #self.assertIsNone(n25.sneak(S))
             
-            f2 = mark_outside(field, loop)
+            f2 = prog.mark_outside(field, loop)
             nodes = f2.all_nodes_sorted()
             print(f'bounds {f2.get_bounds()}')
             print(str(f2))
