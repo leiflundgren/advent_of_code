@@ -25,6 +25,7 @@ class Map:
             for x in range(self.width):
                 if self.raw_map[y][x] == Map.GALAXY:
                     self.galaxies.append((x, y))
+        self.pairs = []
             
     def is_empty_horizonal(self, n:int) -> bool:
         return all(map(lambda c: c == Map.EMPTY, self.raw_map[n]))
@@ -47,7 +48,17 @@ class Map:
             sum(map(lambda x:self.cost_horizontal[x], range(x1, x2))) \
             + sum(map(lambda y:self.cost_vertical[y], range(y1, y2)))
     
+    def get_galaxie_pairs(self):
+        if len(self.pairs) == 0:
+            for g1 in range(len(self.galaxies)-1):
+                for g2 in range(g1+1, len(self.galaxies)):
+                    if g1 != g2:
+                        self.pairs.append((self.galaxies[g1], self.galaxies[g2]))
+        return self.pairs
+                    
 
-
-
+    def sum_dist_pairs(self):
+        pairs = self.get_galaxie_pairs()
+        return sum(map( lambda pair: self.cost(*pair), pairs))
+            
 

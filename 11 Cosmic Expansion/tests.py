@@ -56,6 +56,13 @@ class Tests(unittest.TestCase):
         self.assertEqual(4, m.cost((0,0), (3,0)))
         self.assertEqual(5, m.cost((0,0), (0,4)))
         self.assertEqual(9, m.cost((0,0), (3,4)))
+        
+        pairs = m.get_galaxie_pairs()
+        self.assertEqual(36, len(pairs))
+        
+        sum = m.sum_dist_pairs()
+        self.assertEqual(374, sum)
+        
 
 if __name__ == '__main__':
     unittest.main()
