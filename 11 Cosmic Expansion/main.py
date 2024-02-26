@@ -4,23 +4,21 @@ from pathlib import Path
 import time
 
 
-t0 = time.perf_counter()
 
 input = os.path.join(os.path.dirname(__file__), 'input.txt')
-lines = Path(input).read_text().splitlines()
+input_str = Path(input).read_text()
 
-sum_next = 0
-sum_prev = 0
+
+t0 = time.perf_counter()
+
+m = prog.Map(input_str)
+sum_1 = m.sum_dist_pairs()
 
 t1 = time.perf_counter()
 
-
-for l in lines:
-    ints = list(map(lambda s: int(s), l.split(' ')))
-    p = prog.Predictor(ints)
-    sum_next += p.next_el
-    sum_prev += p.prev_el
+m = prog.Map(input_str, 1000000)
+sum_2 = m.sum_dist_pairs()
 
 t2 = time.perf_counter()
-print(f'9.1  sum:{sum_next} 9.2 sum:{sum_prev}  dt1:{t1-t0}  dt2:{(t2-t1)}') # 1743490457
+print(f'11.1  sum:{sum_1} 11.2 sum:{sum_2}  dt1:{t1-t0}  dt2:{(t2-t1)}') # 9648398
 

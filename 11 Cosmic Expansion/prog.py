@@ -12,13 +12,14 @@ class Map:
     EMPTY = '.'
     GALAXY = '#'
 
-    def __init__(self, str:str):
+    def __init__(self, str:str, empty_cost:int = 2):
         self.raw_map = str.split()
         self.height = len(self.raw_map)
         self.width = len(self.raw_map[0])
         
-        self.cost_vertical = list(map(lambda n: 2 if self.is_empty_horizonal(n) else 1, range(self.height)))
-        self.cost_horizontal = list(map(lambda n: 2 if self.is_empty_vertical(n) else 1, range(self.width)))
+        self.empty_cost = empty_cost
+        self.cost_vertical = list(map(lambda n: empty_cost if self.is_empty_horizonal(n) else 1, range(self.height)))
+        self.cost_horizontal = list(map(lambda n: empty_cost if self.is_empty_vertical(n) else 1, range(self.width)))
         
         self.galaxies = []
         for y in range(self.height):
