@@ -7,59 +7,85 @@ import functools
 from copy import deepcopy
 
 
-class Map:
+class Springs:
     
     EMPTY = '.'
-    GALAXY = '#'
+    SPRING = '#'
+    UNKNOWN = '?'
 
-    def __init__(self, str:str, empty_cost:int = 2):
-        self.raw_map = str.split()
-        self.height = len(self.raw_map)
-        self.width = len(self.raw_map[0])
+    def __init__(self, springs:list[tuple[str, int]], arrangement:list[int]):
+        self.springs = springs
+        self.arrangement = arrangement
+
+    def __str__(self):
+        return f'{self.springs}  {self.arrangement}'
         
-        self.empty_cost = empty_cost
-        self.cost_vertical = list(map(lambda n: empty_cost if self.is_empty_horizonal(n) else 1, range(self.height)))
-        self.cost_horizontal = list(map(lambda n: empty_cost if self.is_empty_vertical(n) else 1, range(self.width)))
-        
-        self.galaxies = []
-        for y in range(self.height):
-            for x in range(self.width):
-                if self.raw_map[y][x] == Map.GALAXY:
-                    self.galaxies.append((x, y))
-        self.pairs = []
+    def reduce(self):
+        while True:
+            print(self)
             
-    def is_empty_horizonal(self, n:int) -> bool:
-        return all(map(lambda c: c == Map.EMPTY, self.raw_map[n]))
-    def is_empty_vertical(self, n:int) -> bool:
-        return all(map(lambda line: line[n] == Map.EMPTY, self.raw_map))
-    
-    def get(self, coord: tuple[int,int]) -> str:
-        (x,y) = coord
-        return self.raw_map[y][x]
-    
-    def cost(self, coord1 : tuple[int,int], coord2 : tuple[int,int]) -> int:
-        (x1,y1) = coord1
-        (x2,y2) = coord2
+            nxt_front = self.reduce_dir(0)
+            nxt_back = (self if nxt_front is None else nxt_front).reduce_dir(-1)
+            
+            if not nxt_back is None:
+                return nxt_back.reduce()
+            elif not nxt_back is None:
+                return nxt_front.reduce()
+            else:
+                return self
+        
+    def reduce_dir(self, dir:int) -> (bool, Self):
+        def copy_except(ls:list, dir:int) -> list:
+            return ls[1:] if dir == 0 else ls[:-1]
+        
 
-        # length is same if mirrored
-        if x1 > x2: (x1, x2) = (x2, x1)
-        if y1 > y2: (y1, y2) = (y2, y1)
-
-        return \
-            sum(map(lambda x:self.cost_horizontal[x], range(x1, x2))) \
-            + sum(map(lambda y:self.cost_vertical[y], range(y1, y2)))
-    
-    def get_galaxie_pairs(self):
-        if len(self.pairs) == 0:
-            for g1 in range(len(self.galaxies)-1):
-                for g2 in range(g1+1, len(self.galaxies)):
-                    if g1 != g2:
-                        self.pairs.append((self.galaxies[g1], self.galaxies[g2]))
-        return self.pairs
+        EMPTY = Springs.EMPTY
+        SPRING = Springs.SPRING 
+        UNKNOWN = Springs.UNKNOWN 
+        
+        if len(self.springs) == 0:
+            return None
                     
+        rev = -1 if dir == 0 else 0
+        (c, cnt) = self.springs[dir]
+        if c == EMPTY:
+            changed = Springs(copy_except(self.springs, dir), self.arrangement)
+            print(changed)
+            return changed
+        
+        arr = self.arrangement[dir]
+        if c == SPRING:
+            changed = Springs(copy_except(self.springs, dir), copy_except(self.arrangement, dir))
+            print(changed)
+            return changed
+        
+        if c == UNKNOWN and cnt == arr: 
+            changed = Springs(copy_except(self.springs, dir), copy_except(self.arrangement, dir))
+            print(changed)
+            return changed
 
-    def sum_dist_pairs(self):
-        pairs = self.get_galaxie_pairs()
-        return sum(map( lambda pair: self.cost(*pair), pairs))
-            
+        return None
+    
+def parse_springs(str:str):
+    def parse_springs(s:str) -> list[tuple[str, int]]:
+        ls : list[tuple[str, int]] = []
+        for c in s:
+            if len(ls)==0:
+                    ls.append((c, 1))
+                    continue
+                
+            (chr, cnt) = ls[-1]
+            if chr == c:
+                ls[-1] = (chr, 1+cnt)
+            else:
+                    ls.append((c, 1))
+        return ls
+        
+    def parse_arrangement(s:str) -> list[int]:
+        return list(map(lambda s: int(s), s.split(',')))
+        
+    space = str.index(' ')
+    springs = parse_springs(str[:space])
+    arrangement = parse_arrangement(str[space+1:])
+    return Springs(springs, arrangement)
 

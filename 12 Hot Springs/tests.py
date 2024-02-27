@@ -1,68 +1,48 @@
 import unittest
 import prog
-from prog import Map
+from prog import Springs
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
-
 def scenario1(): return \
-'''
-...#......
-.......#..
-#.........
-..........
-......#...
-.#........
-.........#
-..........
-.......#..
-#...#.....
-'''.strip()
+('?###???????? 3,2,1', 
+[
+'.###.##.#...',
+'.###.##..#..',
+'.###.##...#.',
+'.###.##....#',
+'.###..##.#..',
+'.###..##..#.',
+'.###..##...#',
+'.###...##.#.',
+'.###...##..#',
+'.###....##.#'])
 
-
-def scenario2(): return [1, 3, 6, 10, 15, 21]
-def scenario3(): return [10, 13, 16, 21, 30, 45]
+def scenario2(): return [
+    (prog.parse_springs('???.### 1,1,3'), 1),
+    (prog.parse_springs('.??..??...?##. 1,1,3'), 4),
+    (prog.parse_springs('?#?#?#?#?#?#?#? 1,3,1,6'), 1),
+    (prog.parse_springs('????.#...#... 4,1,1'), 1),
+    (prog.parse_springs('????.######..#####. 1,6,5'), 4),
+    (prog.parse_springs('?###???????? 3,2,1'), 10),
+]
 
 
     
 class Tests(unittest.TestCase):
-    def test_basics1(self):
-        m = Map(scenario1())
+    def test_scenario1(self):
+        (scen, solution) = scenario1()
         
-        g5 = (1, 5)
-        g8 = (0, 9)
-        g9 = (4, 9)
-        
-        self.assertEqual(Map.GALAXY, m.get(g5))
-        self.assertEqual(Map.GALAXY, m.get(g8))
-        self.assertEqual(Map.GALAXY, m.get(g9))
+        springs = prog.parse_springs(scen)
+        self.assertEqual([3,2,1], springs.arrangement)
+        self.assertEqual([('?', 1), ('#', 3), ('?', 8)], springs.springs)
 
-        self.assertFalse(m.is_empty_horizonal(2))
-        self.assertTrue(m.is_empty_horizonal(3))
-        self.assertFalse(m.is_empty_vertical(1))
-        self.assertTrue(m.is_empty_vertical(8))
-        
-        self.assertEqual(1, m.cost_horizontal[0])
-        self.assertEqual(2, m.cost_horizontal[8])
-        self.assertEqual(1, m.cost_vertical[0])
-        self.assertEqual(2, m.cost_vertical[3])
-        
-        self.assertEqual(3, m.cost((0,0), (0,3)))
-        self.assertEqual(3, m.cost((0,2), (0,4)))
-   
-        self.assertEqual(2, m.cost((3,0), (3,2)))
-   
-        self.assertEqual(4, m.cost((0,0), (2,2)))
-        self.assertEqual(4, m.cost((0,0), (3,0)))
-        self.assertEqual(5, m.cost((0,0), (0,4)))
-        self.assertEqual(9, m.cost((0,0), (3,4)))
-        
-        pairs = m.get_galaxie_pairs()
-        self.assertEqual(36, len(pairs))
-        
-        sum = m.sum_dist_pairs()
-        self.assertEqual(374, sum)
-        
+
+    def test_scenario2(self):
+        scenarios = scenario2()
+        for (n, (springs, combinations)) in zip(range(len(scenarios)), scenarios):
+            print(f'Reduce scen {n}')
+            springs.reduce()
 
 if __name__ == '__main__':
     unittest.main()
