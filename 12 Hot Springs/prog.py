@@ -12,42 +12,90 @@ class Springs:
     EMPTY = '.'
     SPRING = '#'
     UNKNOWN = '?'
+    
+    instanceSeed = 0
 
     def __init__(self, springs:list[tuple[str, int]], arrangment:list[int]):
         self.springs = springs
         self.arrangment = arrangment
+        self.id = ++Springs.instanceSeed
 
     def __str__(self):
         return Springs.makestring(self.springs, self.arrangment)
+
+    def __repr__(self):
+        return 'Springs: ' + str(self)
     
+    def is_empty(self):
+        return 0 == len(self.springs)
+    def not_empty(self):
+        return 0 != len(self.springs)
+
     @staticmethod
     def makestring(springs:list[tuple[str, int]], arrangment:list[int]) -> str:
         return f'{springs}     {arrangment}'
         
     def reduce(self):
-        springs = self.springs
-        arrangment = self.arrangment
+        
+        EMPTY = Springs.EMPTY
+        SPRING = Springs.SPRING 
+        UNKNOWN = Springs.UNKNOWN 
+
+        reduced = True
+        while reduced:
+            reduced = any([
+                self.reduce_ends(),
+                self.reduce_max(),
+            ])
+            
+                
+    
+    def reduce_ends(self) -> bool:
+        EMPTY = Springs.EMPTY
+        SPRING = Springs.SPRING 
+        UNKNOWN = Springs.UNKNOWN 
+
         print(self)
         
         reduced_fwd = reduced_back = True
+        any_change = False
         
-        while reduced_fwd or reduced_back:
+        while self.not_empty() and ( reduced_fwd or reduced_back ):
 
-            (reduced_fwd, pop_springs, pop_arragement) = Springs.can_reduce(springs[0][0], springs[0][1], arrangment[0])
+            (spring, cnt) = self.springs[0]
+            arr = self.arrangment[0]
+
+            (reduced_fwd, pop_springs, pop_arragement) = Springs.can_reduce(spring, cnt, arr)
             if reduced_fwd:
-                if pop_springs: springs.pop(0)
-                if pop_arragement: arrangment.pop(0)
-                print(Springs.makestring(springs, arrangment))
+                if pop_springs: self.springs.pop(0)
+                if pop_arragement: self.arrangment.pop(0)
+                print(self)
                
-            if len(springs) > 0 and len(arrangment) > 0:
-                (reduced_back, pop_springs, pop_arragement) = Springs.can_reduce(springs[-1][0], springs[-1][1], arrangment[-1])
+            if self.not_empty():
+                (spring, cnt) = self.springs[-1]
+                arr = self.arrangment[-1]
+                (reduced_back, pop_springs, pop_arragement) = Springs.can_reduce(spring, cnt, arr)
                 if reduced_back:
-                    if pop_springs: springs.pop(-1)
-                    if pop_arragement: arrangment.pop(-1)
-                    print(Springs.makestring(springs, arrangment))
+                    if pop_springs: self.springs.pop(-1)
+                    if pop_arragement: self.arrangment.pop(-1)
+                    print(self)
+            any_change = any_change or reduced_back or reduced_fwd
 
-        return Springs(springs, arrangment)
-    
+        return any_change
+
+    def reduce_max(self) -> bool:
+        if self.is_empty() : return False
+        
+        max_a = max(self.arrangment)
+        max_s = max(self.springs, key=lambda s: s[1] if s[0] == Springs.SPRING or s[0] == Springs.UNKNOWN else 0)
+        
+        if max_a == max_s[1]:
+            self.springs.remove(max_s)
+            self.arrangment.remove(max_a)
+            print(self)
+            return True            
+        else:
+            return False
 
     # returns (can_reduce, consume_spring, consume_arr)
     @staticmethod
