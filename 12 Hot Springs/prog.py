@@ -30,9 +30,9 @@ class Springs:
         return 'Springs: ' + str(self)
     
     def is_empty(self):
-        return 0 == len(self.springs)
+        return 0 == len(self.springs) or 0 == len(self.arrangment)
     def not_empty(self):
-        return 0 != len(self.springs)
+        return not self.is_empty()
     
     def get_reversed(self):
         return Springs(self.springs.get_reversed(), self.arrangment.get_reversed())
@@ -46,6 +46,8 @@ class Springs:
         EMPTY = Springs.EMPTY
         SPRING = Springs.SPRING 
         UNKNOWN = Springs.UNKNOWN 
+        
+        print("start:            " + str(self))
 
         reduced = True
         while reduced:
@@ -53,6 +55,8 @@ class Springs:
                 self.reduce_front(),
                 self.get_reversed().reduce_front(),
                 self.reduce_max(),
+                self.reduce_orphan_empty(),
+                self.reduce_wildcard_allow_just_one_empty(),
             ])
             
     def reduce_front(self) -> bool:
@@ -70,7 +74,7 @@ class Springs:
         if reduced_fwd:
             if pop_springs: self.springs.pop()
             if pop_arragement: self.arrangment.pop()
-            print(self)
+            print(('rev' if self.springs.is_reversed else 'fwd') + " front:     " + str(self))
             return True
             
         return False
@@ -84,10 +88,55 @@ class Springs:
         if max_a == max_s[1]:
             self.springs.remove(max_s)
             self.arrangment.remove(max_a)
-            print(self)
+            print(('rev' if self.springs.is_reversed else 'fwd') + " max:       " + str(self))
             return True            
-        else:
+
+        return False
+        
+    def reduce_orphan_empty(self) -> bool:        
+        if self.is_empty() : return False
+    
+    # first_non_wildcard = self.springs.index_cond(lambda s: s[0] != Springs.UNKNOWN)
+        # if first_non_wildcard < 0:
+        #     return False
+        # (spring, cnt) = self.springs[first_non_wildcard]
+        
+        # for i in range(first_non_wildcard-1, -1, -1):
+        #     (unknown, cnt2) = self.springs[i]
+        #     if 
+        #     self.springs.pop(i)
+        #     self.arrangment.pop(i)
+        # return True
+        
+        arr = self.arrangment.front()
+        changed = False
+        
+        (ch, cnt) = self.springs.front()
+        if ch == Springs.UNKNOWN and cnt < arr:
+            self.springs.pop()
+            print(('rev' if self.springs.is_reversed else 'fwd') + " orphan:    " + str(self))
+            return True
+        
+        return False
+
+    def reduce_wildcard_allow_just_one_empty(self) -> bool:
+        if len(self.arrangment) < 2:
             return False
+        
+        a1 = self.arrangment[0]
+        a2 = self.arrangment[1]
+        
+        (char, cnt) = self.springs[0]
+
+        if char == Springs.UNKNOWN and (a1 == 1 or a2 == 1) and (a1 + a2 + 1 == cnt):
+            # Only room for 1 empty between springs
+            self.arrangment.pop()
+            self.arrangment.pop()
+            self.springs.pop()
+            print(('rev' if self.springs.is_reversed else 'fwd') + " just_one  " + str(self))
+            return True
+        
+        return False
 
     # returns (can_reduce, consume_spring, consume_arr)
     @staticmethod

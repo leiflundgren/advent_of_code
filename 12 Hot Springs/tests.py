@@ -1,6 +1,7 @@
 from math import comb
 import unittest
 import prog
+import tools
 from prog import Springs
 
 unittest.TestLoader.sortTestMethodsUsing = None
@@ -31,6 +32,21 @@ def scenario2(): return [
 
     
 class Tests(unittest.TestCase):
+    def test_basics(self):
+        self.assertEqual(-1, tools.ListIter.complement_index(0))
+        self.assertEqual(0, tools.ListIter.complement_index(-1))
+        self.assertEqual(-6, tools.ListIter.complement_index(5))
+        self.assertEqual(5, tools.ListIter.complement_index(-6))
+
+        ls = tools.ListIter([0,1,2,3,4,5])
+        
+        self.assertEqual(0, ls[0])
+        self.assertEqual(5, ls[5])
+
+        self.assertEqual(5, ls[-1])
+        self.assertEqual(0, ls[-6])
+
+
     def test_scenario1(self):
         (scen, solution) = scenario1()
         
@@ -45,6 +61,9 @@ class Tests(unittest.TestCase):
             print(f'\nReduce scen {n}: {str_springs}  arr:{combinations}')
             springs = prog.parse_springs(str_springs)
             springs.reduce()
+
+            if  len(springs.springs) == 0 or len(springs.arrangment) == 0:
+                self.assertEqual(1, combinations)
 
 if __name__ == '__main__':
     unittest.main()
