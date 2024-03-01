@@ -5,6 +5,7 @@ import re
 from itertools import tee
 import functools
 from copy import deepcopy
+from tools import ListIter
 
 
 class Springs:
@@ -15,7 +16,9 @@ class Springs:
     
     instanceSeed = 0
 
-    def __init__(self, springs:list[tuple[str, int]], arrangment:list[int]):
+    def __init__(self, springs:ListIter[tuple[str, int]], arrangment:ListIter[int]):
+        assert isinstance(springs, ListIter)
+        assert isinstance(arrangment, ListIter)
         self.springs = springs
         self.arrangment = arrangment
         self.id = ++Springs.instanceSeed
@@ -30,9 +33,12 @@ class Springs:
         return 0 == len(self.springs)
     def not_empty(self):
         return 0 != len(self.springs)
+    
+    def get_reversed(self):
+        return Springs(self.springs.get_reversed(), self.arrangment.get_reversed())
 
     @staticmethod
-    def makestring(springs:list[tuple[str, int]], arrangment:list[int]) -> str:
+    def makestring(springs:ListIter[tuple[str, int]], arrangment:ListIter[int]) -> str:
         return f'{springs}     {arrangment}'
         
     def reduce(self):
@@ -44,44 +50,30 @@ class Springs:
         reduced = True
         while reduced:
             reduced = any([
-                self.reduce_ends(),
+                self.reduce_front(),
+                self.get_reversed().reduce_front(),
                 self.reduce_max(),
             ])
             
-                
-    
-    def reduce_ends(self) -> bool:
+    def reduce_front(self) -> bool:
         EMPTY = Springs.EMPTY
         SPRING = Springs.SPRING 
         UNKNOWN = Springs.UNKNOWN 
 
-        print(self)
-        
-        reduced_fwd = reduced_back = True
-        any_change = False
-        
-        while self.not_empty() and ( reduced_fwd or reduced_back ):
+        if self.springs.is_empty() :
+            return False
 
-            (spring, cnt) = self.springs[0]
-            arr = self.arrangment[0]
+        (spring, cnt) = self.springs.front()
+        arr = self.arrangment.front() if self.arrangment.not_empty() else 0
 
-            (reduced_fwd, pop_springs, pop_arragement) = Springs.can_reduce(spring, cnt, arr)
-            if reduced_fwd:
-                if pop_springs: self.springs.pop(0)
-                if pop_arragement: self.arrangment.pop(0)
-                print(self)
-               
-            if self.not_empty():
-                (spring, cnt) = self.springs[-1]
-                arr = self.arrangment[-1]
-                (reduced_back, pop_springs, pop_arragement) = Springs.can_reduce(spring, cnt, arr)
-                if reduced_back:
-                    if pop_springs: self.springs.pop(-1)
-                    if pop_arragement: self.arrangment.pop(-1)
-                    print(self)
-            any_change = any_change or reduced_back or reduced_fwd
-
-        return any_change
+        (reduced_fwd, pop_springs, pop_arragement) = Springs.can_reduce(spring, cnt, arr)
+        if reduced_fwd:
+            if pop_springs: self.springs.pop()
+            if pop_arragement: self.arrangment.pop()
+            print(self)
+            return True
+            
+        return False
 
     def reduce_max(self) -> bool:
         if self.is_empty() : return False
@@ -141,5 +133,5 @@ def parse_springs(str:str):
     space = str.index(' ')
     springs = parse_springs(str[:space])
     arrangment = parse_arrangment(str[space+1:])
-    return Springs(springs, arrangment)
+    return Springs(ListIter(springs), ListIter(arrangment))
 
