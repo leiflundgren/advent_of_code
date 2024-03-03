@@ -29,17 +29,22 @@ class ListIter(Generic[T]):
     def not_empty(self) -> bool:
         return not self.is_empty()
     
-    def __getitem__(self, index: int) -> T:
+    def __getitem__(self, idx: int) -> T:
         if self.is_reversed:
             idx = ListIter.complement_index(idx)
         
-        if index < len(self):
-            return self.inner[index]
+        if idx < len(self):
+            return self.inner[idx]
         else:
             raise StopIteration
 
+    def __setitem__(self, idx: int, t:T) -> None:
+        if self.is_reversed:
+            idx = ListIter.complement_index(idx)
+        self.inner[idx] = t
+
     def front(self) -> T:
-        return self.inner[-1 if self.is_reversed else 0]
+        return self[0]
 
     @staticmethod
     def complement_index(idx:int) -> int:
@@ -69,6 +74,17 @@ class ListIter(Generic[T]):
     def find_cond(self, cond) -> T:
         idx = self.index_cond(cond)
         return self[idx] if idx >= 0 else None
+    
+    def insert(self, idx:int, t:T) -> None:
+       if self.is_reversed:
+            idx = ListIter.complement_index(idx)
+       self.inner.insert(idx, t)
+
+    def index(self, t:T) -> int:
+        for i in range(len(self)):
+            if self[i] == t:
+                return i
+        return -1
 
 def infinite_iterator(base_src):
     while True:

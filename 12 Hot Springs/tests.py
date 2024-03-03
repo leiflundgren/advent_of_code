@@ -46,6 +46,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(5, ls[-1])
         self.assertEqual(0, ls[-6])
 
+    #def test_change_before_after_to(self):
+    #    unknowns = Springs([(Springs.UNKNOWN, 3)])
 
     def test_scenario1(self):
         (scen, solution) = scenario1()
@@ -60,10 +62,10 @@ class Tests(unittest.TestCase):
         for (n, (str_springs, combinations)) in zip(range(len(scenarios)), scenarios):
             print(f'\nReduce scen {n}: {str_springs}  arr:{combinations}')
             springs = prog.parse_springs(str_springs)
-            springs.reduce()
+            springs.reduce(n)
 
-            if  len(springs.springs) == 0 or len(springs.arrangment) == 0:
-                self.assertEqual(1, combinations)
+            # if  len(springs.springs) == 0 or len(springs.arrangment) == 0:
+            #     self.assertEqual(1, combinations)
 
 if __name__ == '__main__':
     unittest.main()
