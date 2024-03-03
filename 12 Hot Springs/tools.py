@@ -29,14 +29,35 @@ class ListIter(Generic[T]):
     def not_empty(self) -> bool:
         return not self.is_empty()
     
-    def __getitem__(self, idx: int) -> T:
-        if self.is_reversed:
-            idx = ListIter.complement_index(idx)
+    def __getitem__(self, a1, a2=None, a3=None) -> T:
+        start: int
+        stop: int
+        step: int
+
+        if isinstance(a1, slice):
+            (start, stop, step) = int.indices(len(self))
+            return self.__getitem__(start, stop, step)
+        elif isinstance(a1, int):
+            start = a1
+            stop = start+1 if a2 is None else a2
+            step = 1 if a3 is None else a3
+            
+            if self.is_reversed:
+                start = ListIter.complement_index(start)
+                stop = ListIter.complement_index(stop)
+                step = -step
         
-        if idx < len(self):
-            return self.inner[idx]
+            if start >= len(self):
+                raise StopIteration
+            elif start + step == stop:
+                return self.inner[start]
+            else:
+                return ListIter(self.inner[start:stop:step])
+        
+        elif isinstance(int, tuple):
+            raise NotImplementedError('Tuple as index')
         else:
-            raise StopIteration
+            raise TypeError('Invalid argument type: {}'.format(type(a1)))
 
     def __setitem__(self, idx: int, t:T) -> None:
         if self.is_reversed:

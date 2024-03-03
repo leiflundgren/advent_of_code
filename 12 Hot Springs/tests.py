@@ -3,6 +3,7 @@ import unittest
 import prog
 import tools
 from prog import Springs
+from list_on_list import ListOnList
 
 unittest.TestLoader.sortTestMethodsUsing = None
 
@@ -45,6 +46,20 @@ class Tests(unittest.TestCase):
 
         self.assertEqual(5, ls[-1])
         self.assertEqual(0, ls[-6])
+        
+
+    def test_list_on_list(self):
+        self.assertEqual([0,1,2,3,4], ListOnList([0,1,2,3,4]))
+        for i in range(5):
+            self.assertEqual(i, ListOnList([0,1,2,3,4])[i])
+        self.assertEqual([1,2,3,4], ListOnList([0,1,2,3,4])[1:])
+        self.assertEqual([1,2,3,4], ListOnList([0,1,2,3,4])[1:5])
+        self.assertEqual([1,2,3,4], ListOnList([0,1,2,3,4])[1:5:None])
+        self.assertEqual([1,2,3,4], ListOnList([0,1,2,3,4])[1:5:1])
+
+        self.assertEqual([0,1,2,3], ListOnList([0,1,2,3,4])[:-1])
+        self.assertEqual([1,2], ListOnList([0,1,2,3,4])[1:3])
+
 
     #def test_change_before_after_to(self):
     #    unknowns = Springs([(Springs.UNKNOWN, 3)])

@@ -1,12 +1,12 @@
 import tools
 from enum import Enum
-from typing import Iterable, Iterator, Self
+from typing import Iterable, Iterator, Self, Sequence
 import re
 from itertools import tee
 import functools
 from copy import deepcopy
 from tools import ListIter
-
+from list_on_list import ListOnList
 
 class Springs:
     
@@ -16,9 +16,9 @@ class Springs:
     
     instanceSeed = 0
 
-    def __init__(self, springs:ListIter[tuple[str, int]], arrangment:ListIter[int]):
-        assert isinstance(springs, ListIter)
-        assert isinstance(arrangment, ListIter)
+    def __init__(self, springs:Sequence[tuple[str, int]], arrangment:Sequence[int]):
+        assert isinstance(springs, ListIter) or isinstance(springs, ListOnList)
+        assert isinstance(arrangment, ListIter) or isinstance(arrangment, ListOnList)
         self.springs = springs
         self.arrangment = arrangment
         self.id = ++Springs.instanceSeed
@@ -32,6 +32,14 @@ class Springs:
     def __repr__(self):
         return 'Springs: ' + str(self)
     
+    def __hash__(self) -> int:
+        return self.springs.hash()
+
+    def sum_springs(self) -> int:
+        return sum(map(lambda t: t[1], self.springs))
+    def sum_arrangement(self) -> int:
+        return sum(self.arrangment)
+
     def is_empty(self):
         return 0 == len(self.springs) or 0 == len(self.arrangment)
     def not_empty(self):
@@ -40,8 +48,14 @@ class Springs:
     def get_reversed(self):
         return Springs(self.springs.get_reversed(), self.arrangment.get_reversed())
 
+    def sub(self, spring_begin, spring_end ,arr_begin, arr_end, deep_copy = False) -> Self:
+        if deep_copy:
+            return Springs(ListIter(self.springs[spring_begin:spring_end]), ListIter(self.arrangment[arr_begin:arr_end]))
+        else:
+            return Springs(ListOnList(self.springs[spring_begin:spring_end]), ListOnList(self.arrangment[arr_begin:arr_end]))
+
     @staticmethod
-    def makestring(springs:ListIter[tuple[str, int]], arrangment:ListIter[int]) -> str:
+    def makestring(springs:Sequence[tuple[str, int]], arrangment:Sequence[int]) -> str:
         return ''.join(map(lambda t: t[0]*t[1], springs)) + f'  {springs}     {arrangment}'
         
     def reduce(self, n:int):
@@ -68,6 +82,7 @@ class Springs:
                 return True
 
             reducers = [
+                ("sum-match         ", self.reduce_sum_match),
                 ("fwd-empty-front   ", self.reduce_front_empty),
                 ("first spring      ", self.reduce_first_spring),
                 ("back-first spring ", self.get_reversed().reduce_first_spring),
@@ -82,6 +97,12 @@ class Springs:
             ]
             reduced = any(map(reductor, reducers))
             
+    def reduce_sum_match(self) -> bool:
+        if self.sum_springs() == self.sum_arrangment():
+            self.springs = ListIter([])
+            self.arrangment = ListIter([])
+            return True
+        return False
 
     def reduce_front_empty(self) -> bool:
         if self.springs.is_empty() or self.arrangment.is_empty():
