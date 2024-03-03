@@ -1,0 +1,6 @@
+{
+  "TestFramework": "unittest",
+  "UnitTestRootDirectory": "testing",
+  "UnitTestPattern": "test*.py",
+  "SearchPaths": [ "C:\\repos\\advent_of_code_2023\\12 Hot Springs" ]
+}

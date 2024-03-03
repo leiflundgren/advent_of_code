@@ -67,7 +67,7 @@ class Springs:
         print("start:            " + str(self))
 
         reduced = True
-        while reduced:
+        while reduced and self.springs.not_empty() and self.arrangment.not_empty():
             def reductor(tup) -> bool:
                 (name, method) = tup
                 if not method(): return False
@@ -96,9 +96,11 @@ class Springs:
                 ("just one emptry   ", self.reduce_wildcard_allow_just_one_empty),
             ]
             reduced = any(map(reductor, reducers))
-            
+          
+        print("reduced: ", str(self))
+
     def reduce_sum_match(self) -> bool:
-        if self.sum_springs() == self.sum_arrangment():
+        if self.sum_springs() == self.sum_arrangement():
             self.springs = ListIter([])
             self.arrangment = ListIter([])
             return True
