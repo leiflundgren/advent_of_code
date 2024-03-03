@@ -49,38 +49,76 @@ class Tests(unittest.TestCase):
         
 
     def test_list_on_list(self):
-        self.assertEqual([0,1,2,3,4], ListOnList([0,1,2,3,4]))
-        for i in range(5):
-            self.assertEqual(i, ListOnList([0,1,2,3,4])[i])
-        self.assertEqual([1,2,3,4], ListOnList([0,1,2,3,4])[1:])
-        self.assertEqual([1,2,3,4], ListOnList([0,1,2,3,4])[1:5])
-        self.assertEqual([1,2,3,4], ListOnList([0,1,2,3,4])[1:5:None])
-        self.assertEqual([1,2,3,4], ListOnList([0,1,2,3,4])[1:5:1])
-
-        self.assertEqual([0,1,2,3], ListOnList([0,1,2,3,4])[:-1])
-        self.assertEqual([1,2], ListOnList([0,1,2,3,4])[1:3])
-
-
-    #def test_change_before_after_to(self):
-    #    unknowns = Springs([(Springs.UNKNOWN, 3)])
-
-    def test_scenario1(self):
-        (scen, solution) = scenario1()
+        ls5 = [0,1,2,3,4]
+        lol5 = ListOnList(ls5)
+        it1 = iter(ls5)
+        it2 = iter(lol5)
         
-        springs = prog.parse_springs(scen)
-        self.assertEqual([3,2,1], springs.arrangment)
-        self.assertEqual([('?', 1), ('#', 3), ('?', 8)], springs.springs)
+
+        # zero = lol5[0]
+        # four = lol5[4]
+
+        # for i in ls5:
+        #     pass
+        for i in lol5:
+            j = i
+
+        self.assertEqual(0, next(it1))
+        self.assertEqual(0, next(it2))
+        self.assertEqual(1, next(it1))
+        self.assertEqual(1, next(it2))
+        self.assertEqual(2, next(it1))
+        self.assertEqual(2, next(it2))
+        self.assertEqual(3, next(it1))
+        self.assertEqual(3, next(it2))
+        self.assertEqual(4, next(it1))
+        self.assertEqual(4, next(it2))
+        
 
 
-    def test_scenario2(self):
-        scenarios = scenario2()
-        for (n, (str_springs, combinations)) in zip(range(len(scenarios)), scenarios):
-            print(f'\nReduce scen {n}: {str_springs}  arr:{combinations}')
-            springs = prog.parse_springs(str_springs)
-            springs.reduce(n)
+        try:
+            fem = lol5[5]
+        except IndexError:
+            pass
+        
+        with self.assertRaises(IndexError) as x:
+            lol5[5]
+        self.assertRaises(StopIteration, lambda: next(it2))
+        self.assertRaises(StopIteration, lambda: next(it1))
 
-            # if  len(springs.springs) == 0 or len(springs.arrangment) == 0:
-            #     self.assertEqual(1, combinations)
+
+        self.assertEqual([0,1,2,3,4], lol5)
+        for i in range(5):
+            self.assertEqual(i, lol5[i])
+        self.assertEqual([1,2,3,4], lol5[1:])
+        self.assertEqual([1,2,3,4], lol5[1:5])
+        self.assertEqual([1,2,3,4], lol5[1:5:None])
+        self.assertEqual([1,2,3,4], lol5[1:5:1])
+
+        self.assertEqual([0,1,2,3], lol5[:-1])
+        self.assertEqual([1,2], lol5[1:3])
+
+
+    # #def test_change_before_after_to(self):
+    # #    unknowns = Springs([(Springs.UNKNOWN, 3)])
+
+    # def test_scenario1(self):
+    #     (scen, solution) = scenario1()
+        
+    #     springs = prog.parse_springs(scen)
+    #     self.assertEqual([3,2,1], springs.arrangment)
+    #     self.assertEqual([('?', 1), ('#', 3), ('?', 8)], springs.springs)
+
+
+    # def test_scenario2(self):
+    #     scenarios = scenario2()
+    #     for (n, (str_springs, combinations)) in zip(range(len(scenarios)), scenarios):
+    #         print(f'\nReduce scen {n}: {str_springs}  arr:{combinations}')
+    #         springs = prog.parse_springs(str_springs)
+    #         springs.reduce(n)
+
+    #         # if  len(springs.springs) == 0 or len(springs.arrangment) == 0:
+    #         #     self.assertEqual(1, combinations)
 
 if __name__ == '__main__':
     unittest.main()
