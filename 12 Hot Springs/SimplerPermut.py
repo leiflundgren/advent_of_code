@@ -29,17 +29,20 @@ class Perm2:
 
 
     def calc_inner(self, scen : Springs) -> int:
-        springs : ListOnList[tuple[str, int]] = scen.springs if isinstance(scen ,Springs) else scen
-        arrangment:ListOnList[int] = scen.arrangment
+        arr = scen.get_arragment(0)
+        (chr, cnt) = scen.get_spring(0)
         
-        strscen = str(scen)
-
-        if len(arrangment) == 0:
-            if len(springs) == 0:
+        if chr == Springs.EMPTY:
+           return self.calc(scen.pop_spring())
+        
+        if arr == 0:
+            if chr == Springs.UNKNOWN:
+                return self.calc(scen.pop_spring())
+            if chr == Springs.NULL:
                 return 1 
             else:
                 return 0
-        if len(springs) == 0: # since len(arr)>0 we failed to place something
+        if chr == Springs.NULL: # since len(arr)>0 we failed to place something
             return 0
 
         if self.use_cache:
@@ -47,11 +50,7 @@ class Perm2:
             if not cached is None:
                 return cached
     
-        arr = arrangment.front()
-        (chr, cnt) = springs.front()
 
-        if chr == Springs.EMPTY:
-           return self.calc(scen.pop_spring())
 
         if chr == Springs.SPRING:
             return self.calc_assume_spring(scen)

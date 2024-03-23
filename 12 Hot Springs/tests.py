@@ -23,11 +23,13 @@ def scenario1(): return \
 '.###....##.#'])
 
 def scenario2(): return [
-#    ('???.### 1,1,3', 1),
-#    ('.??..??...?##. 1,1,3', 4),
+    ('???.### 1,1,3', 1),
+    ('.??..??...?##. 1,1,3', 4),
     ('?#?#?#?#?#?#?#? 1,3,1,6', 1),
     ('????.#...#... 4,1,1', 1),
     ('????.######..#####. 1,6,5', 4),
+    ('?? 2',  1),
+    ('??????? 2,1',  10),
     ('?###???????? 3,2,1', 10),
 ]
 
@@ -118,15 +120,21 @@ class Tests(unittest.TestCase):
     # #    unknowns = Springs([(Springs.UNKNOWN, 3)])
 
 
-    def test_trivial_permutators(self):
+    def test_aa_trivial_permutators(self):
         def gen(scen:str) -> Springs:
             return prog.parse_springs(scen)
         
+        self.assertEqual(6, Perm2(False).calc_permutations(gen('?????? 2,1')))
+        self.assertEqual(3, Perm2(False).calc_permutations(gen('????? 2,1')))
+        self.assertEqual(1, Perm2(False).calc_permutations(gen('???? 2,1')))
+        self.assertEqual(10, Perm2(False).calc_permutations(gen('??????? 2,1')))
+        self.assertEqual(1, Perm2(False).calc_permutations(gen('?? 2')))
         self.assertEqual(1, Perm2(False).calc_permutations(gen("## 2")))
         self.assertEqual(1, Perm2(False).calc_permutations(gen("?? 2")))
         self.assertEqual(2, Perm2(False).calc_permutations(gen("?? 1")))
         self.assertEqual(1, Perm2(False).calc_permutations(gen("?# 1")))
         self.assertEqual(1, Perm2(False).calc_permutations(gen("?#??# 3,1")))
+        
 
     def test_scenario1(self):
         (scen, solution) = scenario1()
