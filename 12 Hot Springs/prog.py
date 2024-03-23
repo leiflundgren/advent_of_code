@@ -1,6 +1,6 @@
 import tools
 from enum import Enum
-from typing import Iterable, Iterator, Self, Sequence
+from typing import Iterable, Iterator, Self, Sequence, Tuple
 import re
 from itertools import tee
 import functools
@@ -10,6 +10,7 @@ from list_on_list import ListOnList
 
 class Springs:
     
+    NULL = ''
     EMPTY = '.'
     SPRING = '#'
     UNKNOWN = '?'
@@ -33,10 +34,16 @@ class Springs:
         return 'Springs: ' + str(self)
     
     def __hash__(self) -> int:
-        return self.springs.hash()
+        return tools.hashOfList(self.springs)
 
-    def sum_springs(self) -> int:
-        return sum(map(lambda t: t[1], self.springs))
+    def sum_springs_and_unknown(self) -> int:
+        if len(self.springs) == 0: return 0
+        
+        if isinstance(self.springs[0], tuple):        
+            return sum(map(lambda t: t[1], self.springs))
+        else:
+            return len(self.springs)
+        
     def sum_arrangement(self) -> int:
         return sum(self.arrangment)
 
@@ -48,24 +55,59 @@ class Springs:
     def get_reversed(self):
         return Springs(self.springs.get_reversed(), self.arrangment.get_reversed())
 
+    def get_spring_at(self, idx:int) -> str:
+        return self.springs[idx][0] if idx < len(self.springs) else ''
+
+    def get_spring(self, idx:int) -> Tuple[str, int]:
+        return self.springs[idx] if idx < len(self.springs) else ('',0)
+
+    def get_arragment(self, idx:int) -> int:
+        return self.arrangment[idx] if idx < len(self.arrangment) else 0
+
+    def pop_arragment(self) -> Self:
+        return Springs(self.springs, self.arrangment.slice_front())
+    def pop_spring(self) -> Self:
+        return Springs(self.springs.slice_front(), self.arrangment)
+    def pop_both(self) -> Self:
+        return Springs(self.springs.slice_front(), self.arrangment.slice_front())
+
+    def __copy__(self):
+        return self.copy(True)
+    def copy(self, deep_copy = False) -> Self:
+        return self.sub(0, len(self.springs), 0, len(self.arrangment), deep_copy)
+
     def sub(self, spring_begin, spring_end ,arr_begin, arr_end, deep_copy = False) -> Self:
         if deep_copy:
-            return Springs(ListIter(self.springs[spring_begin:spring_end]), ListIter(self.arrangment[arr_begin:arr_end]))
+            return Springs(ListIter(self.springs.inner[spring_begin:spring_end]), ListIter(self.arrangment.inner[arr_begin:arr_end]))
         else:
-            return Springs(ListOnList(self.springs[spring_begin:spring_end]), ListOnList(self.arrangment[arr_begin:arr_end]))
+            return Springs(ListOnList(self.springs.inner[spring_begin:spring_end]), ListOnList(self.arrangment.inner[arr_begin:arr_end]))
+
+    def pretty_str(self) -> str:
+        pre = ''    
+        if len(self.springs) > 0:
+            pre = ''.join(map(lambda t: t[0]*t[1], self.springs))
+        
+        return f'{pre}  {self.arrangment}'
 
     @staticmethod
     def makestring(springs:Sequence[tuple[str, int]], arrangment:Sequence[int]) -> str:
-        return ''.join(map(lambda t: t[0]*t[1], springs)) + f'  {springs}     {arrangment}'
         
-    def reduce(self, n:int):
+        pre = ''
+        try :
+            if len(springs) > 0 and isinstance(springs[0], tuple):
+                pre = ''.join(map(lambda t: t[0]*t[1], springs))
+        except:
+            bp = 17
+        return  pre + f'  {springs}     {arrangment}'
+        
+    def reduce(self, id = None) -> bool:
         
         EMPTY = Springs.EMPTY
         SPRING = Springs.SPRING 
         UNKNOWN = Springs.UNKNOWN 
         
         print("start:            " + str(self))
-
+        any_reduce = False
         reduced = True
         while reduced and self.springs.not_empty() and self.arrangment.not_empty():
             def reductor(tup) -> bool:
@@ -96,11 +138,13 @@ class Springs:
                 ("just one emptry   ", self.reduce_wildcard_allow_just_one_empty),
             ]
             reduced = any(map(reductor, reducers))
+            any_reduce = any_reduce or reduced
           
         print("reduced: ", str(self))
+        return any_reduce
 
     def reduce_sum_match(self) -> bool:
-        if self.sum_springs() == self.sum_arrangement():
+        if self.sum_springs_and_unknown() == self.sum_arrangement():
             self.springs = ListIter([])
             self.arrangment = ListIter([])
             return True
@@ -259,10 +303,11 @@ class Springs:
             self.springs.pop()
             
             #self.change_before_after_to(1, Springs.EMPTY)
-            (frnt, cnt) = self.springs[0]
-            if frnt == Springs.UNKNOWN:
-                self.springs.insert(0, (Springs.EMPTY, 1))
-                self.springs[1] = (Springs.UNKNOWN, cnt-1)
+            if len(self.springs) > 0:
+                (frnt, cnt) = self.springs[0]
+                if frnt == Springs.UNKNOWN:
+                    self.springs.insert(0, (Springs.EMPTY, 1))
+                    self.springs[1] = (Springs.UNKNOWN, cnt-1)
 
             
             return True

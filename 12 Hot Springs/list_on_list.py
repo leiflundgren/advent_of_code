@@ -15,10 +15,10 @@ class ListOnList(Sequence[T]):
         self.is_reversed = is_reversed
         
     def __str__(self) -> str:
-        return str(self.inner)
+        return str(self.inner[self.begin:self.end])
 
     def __repr__(self) -> str:
-        return f'ListOnList: {self.inner} {"reversed" if self.is_reversed else ""}'
+        return f'ListOnList: {self} {"reversed" if self.is_reversed else ""}'
 
     def __len__(self) -> int:
         return self.end - self.begin
@@ -93,6 +93,10 @@ class ListOnList(Sequence[T]):
     def __setitem__(self, idx: int, t:T) -> None:
         raise RuntimeError('ListOnList is const')
 
+    def copy(self, start=None, stop=None):
+        if self.is_reversed: raise NotImplemented("cannot copy a reverted list yet")
+        return ListOnList(self.inner[start:stop])
+
     def __reversed__(self) -> Sequence[T]:
         return ListOnList(self.inner, self.start, self.stop, not self.is_reversed)
 
@@ -132,9 +136,16 @@ class ListOnList(Sequence[T]):
         else:
             raise RuntimeError('ListOnList only allow delete from front/back')
 
+    def slice_front(self):
+        if len(self) <= 1:
+            return ListOnList()
+        else:
+            return ListOnList(self.get_inner(), 1+self.begin)
 
     def remove(self, x) -> None:
-        self.pop(x)
+        idx = self.index(x)
+        if idx >= 0:
+            self.pop(idx)
 
     # return first index matching condition
     def index_cond(self, cond) -> int:
@@ -160,10 +171,16 @@ class ListOnList(Sequence[T]):
         l =  len(self.inner)
         return ListOnList(self.inner, l - self.begin, l - self.end, not self.is_reversed)
 
-    def sublist(self, begin:int, end:int) -> Sequence[T]:
+    def sub(self, begin:int, end:int = None) -> Sequence[T]:
         return self[begin:end]
         # end = end if end >= 0 else len(self)-1 + end
         # return ListOnList(self.begin+begin, self.end-end)
+    
+    def get_inner(self) -> list[T]:
+        if self.is_reversed:
+            return self.inner[self.end-1:self.begin-1:-1]
+        else:
+            return self.inner
 
 def infinite_iterator(base_src):
     while True:
