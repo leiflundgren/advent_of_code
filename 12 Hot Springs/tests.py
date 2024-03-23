@@ -169,6 +169,13 @@ class Tests(unittest.TestCase):
             c = perm.calc_permutations(springs)
             
             self.assertEqual(combinations, c)
+            
+    def test__five_fold(self):
+        f1 = prog.parse_springs(".# 1").five_fold()
+        self.assertEqual('.#?.#?.#?.#?.#  [1, 1, 1, 1, 1]', f1.pretty_str())
+        f2 = prog.parse_springs('???.### 1,1,3').five_fold()
+        self.assertEqual('???.###????.###????.###????.###????.###  [1, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3]', f2.pretty_str())
+        
 
 if __name__ == '__main__':
     unittest.main()

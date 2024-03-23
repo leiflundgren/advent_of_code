@@ -18,10 +18,11 @@ class Springs:
     instanceSeed = 0
 
     def __init__(self, springs:Sequence[tuple[str, int]], arrangment:Sequence[int]):
-        assert isinstance(springs, ListIter) or isinstance(springs, ListOnList)
-        assert isinstance(arrangment, ListIter) or isinstance(arrangment, ListOnList)
-        self.springs = springs
-        self.arrangment = arrangment
+        
+        self.springs = ListOnList(springs) if isinstance(springs, list) else springs
+        self.arrangment = ListOnList(arrangment) if isinstance(arrangment, list) else arrangment
+        assert isinstance(self.springs, ListIter) or isinstance(self.springs, ListOnList)
+        assert isinstance(self.arrangment, ListIter) or isinstance(self.arrangment, ListOnList)
         self.id = ++Springs.instanceSeed
 
     def revstr(self) -> str:
@@ -379,6 +380,14 @@ class Springs:
 
             idx=idx+1
         return changed
+    
+    def five_fold(self):
+        unknown = [(Springs.UNKNOWN, 1)]
+        springs = self.springs.get_inner()
+        arr = self.arrangment.get_inner()
+        five_springs = springs + unknown +springs + unknown +springs + unknown +springs + unknown +springs
+        five_arr = arr+arr+arr+arr+arr
+        return Springs(five_springs, five_arr)
                     
 def parse_springs(str:str):
     def parse_springs(s:str) -> list[tuple[str, int]]:

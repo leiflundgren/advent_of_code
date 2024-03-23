@@ -5,8 +5,9 @@ from list_on_list import ListOnList
 import tools
 
 class Perm2:
-    def __init__(self, use_cache:bool):
+    def __init__(self, use_cache:bool, print:bool = True):
         self.use_cache = use_cache
+        self.print=print
 
     def calc_permutations(self, scen:Springs) -> int:
         self.cache : Dict[Springs, int] = {}
@@ -22,7 +23,7 @@ class Perm2:
 
     def calc(self, scen : Springs) -> int:
         p = self.calc_inner(scen)
-        print(f'{scen.pretty_str()} --> {p}')
+        if self.print: print(f'{scen.pretty_str()} --> {p}')
         if p == 1:
             bp = 17
         return p
