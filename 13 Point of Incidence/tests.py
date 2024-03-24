@@ -38,6 +38,10 @@ class Tests(unittest.TestCase):
         self.assertEqual([5], rot1.find_equal_lines())
         self.assertEqual([5], rot1.find_mirrors())
 
+        sum1 = map1.sum_lines()
+        self.assertEqual(5, sum1)
+
+
         map2 = Matrix(pattern2)
         print()
         print(map2)
@@ -50,6 +54,12 @@ class Tests(unittest.TestCase):
         self.assertEqual([3, 7], rot2.find_equal_lines())
         self.assertEqual([], rot2.find_mirrors())
         
+        sum2 = map2.sum_lines()
+        self.assertEqual(400, sum2)
+        
+
+        
+
 if __name__ == '__main__':
     unittest.main()
     

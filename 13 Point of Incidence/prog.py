@@ -41,3 +41,8 @@ class Matrix:
     def find_mirrors(self) -> list[int]:
         return list(filter(lambda n: self.check_if_mirror(n), self.find_equal_lines()))
             
+    def sum_lines(self) -> int:
+        rows = self.find_mirrors()
+        columns = self.rotate().find_mirrors()
+        
+        return sum(columns) + 100*sum(rows)
