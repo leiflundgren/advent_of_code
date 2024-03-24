@@ -2,9 +2,11 @@ import tools
 from enum import Enum
 from typing import Iterable, Iterator, Self, Sequence, Tuple
 
+
 class Matrix:
-    def __init__(self, src : list[str]):
+    def __init__(self, src : list[str], lines_equals = None):
         self.data = src
+        self.lines_equals = (Matrix.lines_exactly_equal if lines_equals is None else lines_equals)
         
     # get 1-indexed
     def getLine(self, i : int) -> str:
@@ -15,6 +17,18 @@ class Matrix:
     def __str__(self) -> str:
         return '\n'.join(self.data)
     
+    @staticmethod
+    def lines_exactly_equal(x:str, y:str) -> bool:
+        return x == y
+    @staticmethod
+    def lines_1_difference(x:str, y:str) -> bool:
+        
+        diffs = 0
+        for (cx, cy) in zip(x, y):
+            if cx != cy:
+                ++diffs
+        return diffs == 1
+
     def rotate(self) -> Self:
         y = list(map(lambda i: ''.join([ self.data[j][i] for j in range(len(self)) ]), range(len(self.data[0]))))
         return Matrix(y)
@@ -22,7 +36,7 @@ class Matrix:
     def find_equal_lines(self) -> list[int]:
         res = []
         for i in range(1, len(self)):
-            if self.getLine(i) == self.getLine(i+1):
+            if self.lines_equals(self.getLine(i), self.getLine(i+1)):
                 res.append(i)
         return res
     
@@ -31,7 +45,7 @@ class Matrix:
         while p1 > 0 and p2 <= len(self):
             l1 = self.getLine(p1)
             l2 = self.getLine(p2)
-            if l1 != l2: 
+            if not self.lines_equals(l1, l2):
                 return False
             
             p1 = p1-1
