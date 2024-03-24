@@ -10,6 +10,7 @@ class Perm2:
         self.print=print
 
     def calc_permutations(self, scen:Springs) -> int:
+        assert isinstance(scen, Springs), f'expected scen to be Springs, was {type(scen)}: {scen}'
         self.cache : Dict[Springs, int] = {}
         expanded_strings = []
         for (chr, cnt) in scen.springs:
@@ -22,10 +23,17 @@ class Perm2:
         return self.calc(Springs(ListOnList(expanded_strings), ListOnList(tools.get_inner_list(scen.arrangment))))
 
     def calc(self, scen : Springs) -> int:
+        if self.use_cache:
+            cached = self.cache.get(scen, None)
+            if not cached is None:
+                return cached
+            
         p = self.calc_inner(scen)
+    
+        if self.use_cache:
+            self.cache[scen] = p
+            
         if self.print: print(f'{scen.pretty_str()} --> {p}')
-        if p == 1:
-            bp = 17
         return p
 
 
@@ -46,11 +54,6 @@ class Perm2:
         if chr == Springs.NULL: # since len(arr)>0 we failed to place something
             return 0
 
-        if self.use_cache:
-            cached = self.cache.get(scen, None)
-            if not cached is None:
-                return cached
-    
 
 
         if chr == Springs.SPRING:
@@ -60,8 +63,6 @@ class Perm2:
         cnt_spring = self.calc_assume_spring(scen)
         cnt_empty = self.calc_assume_empty(scen)
         
-        if self.use_cache:
-            self.cache[scen] = cnt_spring + cnt_empty
 
         return cnt_spring + cnt_empty
 
@@ -75,9 +76,6 @@ class Perm2:
     def calc_assume_spring(self, scen : Springs) -> int:
         
         assert Springs.UNKNOWN == scen.get_spring_at(0) or Springs.SPRING == scen.get_spring_at(0)
-        
-        if str(scen).startswith('#?#?#?  '):
-            bp = 17
             
         arr = scen.get_arragment(0)
         scen0 = scen

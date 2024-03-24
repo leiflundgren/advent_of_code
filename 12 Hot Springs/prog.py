@@ -1,3 +1,4 @@
+from pickle import FALSE
 import tools
 from enum import Enum
 from typing import Iterable, Iterator, Self, Sequence, Tuple
@@ -36,6 +37,17 @@ class Springs:
     
     def __hash__(self) -> int:
         return tools.hashOfList(self.springs)
+    
+    @staticmethod
+    def equals(x : Self, y : Self) -> bool:
+        if len(x.springs) != len(y.springs): return False
+        if len(x.arrangment) != len(y.arrangment): return False
+        if x.springs != y.springs : return False
+        if x.arrangment != y.arrangment: return False
+        return True
+
+    def __eq__(self, other):
+        return Springs.equals(self, other)
 
     def sum_springs_and_unknown(self) -> int:
         if len(self.springs) == 0: return 0
@@ -389,8 +401,8 @@ class Springs:
         five_arr = arr+arr+arr+arr+arr
         return Springs(five_springs, five_arr)
                     
-def parse_springs(str:str):
-    def parse_springs(s:str) -> list[tuple[str, int]]:
+def parse_springs(s:str) -> Springs:
+    def parse_springs_(s:str) -> list[tuple[str, int]]:
         ls : list[tuple[str, int]] = []
         for c in s:
             if len(ls)==0:
@@ -407,8 +419,11 @@ def parse_springs(str:str):
     def parse_arrangment(s:str) -> list[int]:
         return list(map(lambda s: int(s), s.split(',')))
         
-    space = str.index(' ')
-    springs = parse_springs(str[:space])
-    arrangment = parse_arrangment(str[space+1:])
+    if s == '???.????...???#?#? 2,4,2,4':
+        bp = 17
+
+    space = s.index(' ')
+    springs = parse_springs_(s[:space])
+    arrangment = parse_arrangment(s[space+1:])
     return Springs(ListIter(springs), ListIter(arrangment))
 

@@ -150,7 +150,7 @@ def natural_numbers(start = 0):
 def hashOfList(ls : Iterable[T]) -> int:
     h = 0
     for x in ls:
-        h = 31*h + hash(h)
+        h = 31*h + hash(x)
     return h
 
 def get_inner_list(ls : Iterable[T]) -> list[T] : 
