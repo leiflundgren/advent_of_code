@@ -1,6 +1,8 @@
 from itertools import count
 import itertools
+from re import S
 import tools
+import copy
 from enum import Enum
 from typing import Iterable, Iterator, Self, Sequence, Tuple
 from directions import Direction
@@ -15,7 +17,11 @@ class Matrix:
         self.data = list(map(lambda s: list(s), src))
         self.dir = dir
         self.lines_equals = Matrix.lines_exactly_equal
-        
+
+    def clone(self) -> Self:
+        data = copy.deepcopy(self.data)
+        return Matrix(self.name, data, self.dir)
+
     # get 1-indexed
     def getLine(self, i : int) -> list[str]:
         return self.data[i-1]
@@ -34,8 +40,25 @@ class Matrix:
     def __str__(self) -> str:
         return '\n'.join(map(lambda row: ''.join(row), self.data))
     
+    def __eq__(self, v: object) -> bool:
+        b = self.name == v.name \
+            and self.dir == v.dir \
+            and self.get_height() == v.get_height() \
+            and self.get_width() == v.get_width()
+        if not b: return False
+        
+        for (x,y) in self.get_points():
+            if self.get(x,y) != v.get(x,y):
+                return False
+        return True
+    
     def line_range(self) -> Iterable[int]:
         return range(1, self.get_height()+1)
+    
+    def get_points(self) -> Iterable[tuple[int,int]]:
+        for y in range(1, 1+self.get_height()):
+            for x in range(1, 1+self.get_width()):
+                yield (x,y)
 
     @staticmethod
     def lines_exactly_equal(x:str, y:str) -> bool:
@@ -82,6 +105,37 @@ class Matrix:
         return m
         # y = list(map(lambda i: ''.join([ self.data[j][i] for j in range(self.get_height()) ]), range(len(self.data[0]))))
         # return Matrix(self.name, y, self.dir)
+
+    @staticmethod
+    def tilt(m:Self, d:Direction) -> Self:
+        m = m.clone() 
+        
+        while d != Direction.N:
+            m = m.rotate()
+            d = d.rotate(90)
+           
+
+        for (x,y) in m.get_points():
+            
+            if y == 1: continue # first line, already tilted
+
+            if m.get(x,y) == 'O':
+                empty = y
+                for i in range(y-1, 0, -1):
+                    if m.get(x, i) == '.':
+                        empty = i
+                    else:
+                        break
+                if empty < y: # move it
+                    m.set(x, y, '.')
+                    m.set(x, empty, 'O')
+
+
+        while d != Direction.N:
+            m = m.rotate()
+            d = d.rotate(90)
+
+        return m
 
     @staticmethod
     def calc_force(m, d:Direction) -> int:

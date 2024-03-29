@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from collections import UserList
-from typing import Iterable, Self, TypeVar, Sequence, overload, Generic
+from typing import Iterable, Iterator, Self, TypeVar, Sequence, overload, Generic
 T = TypeVar('T')
 
 class ListIter(Generic[T]):
@@ -195,3 +195,9 @@ def split_list_on_empty_line(lines:list[str]) -> list[list[str]]:
 
     return res
 
+
+def first(it : Iterator[T], default:T, cond) -> T:
+    for x in it:
+        if cond(x):
+            return x
+    return default
