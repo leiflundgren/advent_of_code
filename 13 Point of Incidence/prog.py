@@ -72,7 +72,7 @@ class Matrix:
     
     def find_mirrors(self, expected_diffs: int) -> list[int]:
         
-        lines = range(1, (-1+self.get_height()))
+        lines = range(1, (self.get_height()))
 
         return list(filter(lambda n: expected_diffs == self.count_mirror_faults(n), lines))
             
@@ -91,7 +91,7 @@ class Matrix:
             return sum_
 
         (p1, p2) = (line, line+1)
-        if p1 <= 0 or p2 >= self.get_height():
+        if p1 <= 0 or p2 > self.get_height():
             return 100000
         
         sum_ = 0

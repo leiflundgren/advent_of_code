@@ -177,3 +177,21 @@ class AllowSomeDifferenceEquals:
                 else:
                     return False
         return True
+    
+
+def split_list_on_empty_line(lines:list[str]) -> list[list[str]]:
+    res = []
+    tmp = []
+    for line in lines:
+        if len(line) == 0 and len(tmp) > 0:
+            res.append(tmp)
+            tmp = []
+        else:
+            tmp.append(line)
+
+    if len(tmp) > 0:
+        res.append(tmp)
+        tmp = []
+
+    return res
+
