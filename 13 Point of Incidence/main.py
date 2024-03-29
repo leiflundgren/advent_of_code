@@ -27,14 +27,18 @@ def main():
     input_txt = os.path.join(os.path.dirname(__file__), 'input.txt')
     input_str = list(Path(input_txt).read_text().splitlines())
 
-    sum = 0
+    sum_1 = 0; sum_2 = 0
     
     for (n, pattern) in zip(tools.natural_numbers(), split_list_on_empty_line(input_str)):
-        m = Matrix(pattern)
-        print(f'{n}\n{m}')
-        sum = sum + m.sum_lines()
+        m1 = Matrix(pattern, Matrix.lines_exactly_equal)
+        print(f'{n}\n{m1}')
+        sum_1 = sum_1 + m1.sum_lines()
 
-    print(sum)    ## 29130
+        m2 = Matrix(pattern, Matrix.lines_1_difference)
+        sum_2 = sum_2 + m2.sum_lines()
+
+
+    print(f'sum1:{sum_1}  sum2:{sum_2}')    ## 29130
 
 if __name__ == '__main__':
     main()

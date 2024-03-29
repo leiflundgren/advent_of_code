@@ -158,3 +158,22 @@ def get_inner_list(ls : Iterable[T]) -> list[T] :
         return ls
     else:
         return get_inner_list(ls.get_inner())
+    
+
+def equals_string(x:str, y:str) -> bool:
+    return x == y
+
+class AllowSomeDifferenceEquals:
+    def __init__(self, allowed_wrongs : int):
+        self.allowed_wrongs =allowed_wrongs 
+        
+    def equals_strings(self, x:str, y:str) -> bool:
+        if x==y: return True
+        if len(x)!=len(y): return False
+        for (cx, cy) in zip(x, y):
+            if cx != cy:
+                if self.allowed_wrongs > 0:
+                    self.allowed_wrongs = self.allowed_wrongs-1
+                else:
+                    return False
+        return True
