@@ -1,3 +1,4 @@
+from contextlib import redirect_stdout
 from itertools import count
 import itertools
 from re import S
@@ -40,6 +41,18 @@ class Matrix:
     def __str__(self) -> str:
         return '\n'.join(map(lambda row: ''.join(row), self.data))
     
+    def __repr__(self) -> str:
+        return f'{self.name} dir:{self.dir}   \n' + str(self)
+
+    def hashstr(self) -> str:
+        #hashstr = [''.join(s) for s in [''.join(line) for line in self.data]]
+        # hashstr2 = ''.join([''.join(line) for line in self.data])
+        hashstr = "".join(["".join(map(str, row)) for row in self.data])
+        return hashstr
+    
+    def __hash__(self) -> int:
+        return hash(self.hashstr())
+
     def __eq__(self, v: object) -> bool:
         b = self.name == v.name \
             and self.dir == v.dir \
@@ -92,7 +105,7 @@ class Matrix:
             return new_matrix
 
 
-        m = Matrix(self.name, rotate_matrix(self.data), self.dir.rotate(90))
+        m = Matrix(self.name, rotate_matrix(self.data), self.dir.rotate(-90))
         # m_h = m.get_height()
         # m_w = m.get_width()
 
@@ -107,13 +120,17 @@ class Matrix:
         # return Matrix(self.name, y, self.dir)
 
     @staticmethod
-    def tilt(m:Self, d:Direction) -> Self:
+    def tilt(m:Self, dir:Direction, debug_print:bool = True) -> Self:
         m = m.clone() 
+        org_dir = m.dir
         
-        while d != Direction.N:
+        rots_done = 0
+        while m.dir != dir:
             m = m.rotate()
-            d = d.rotate(90)
-           
+            rots_done += 1
+        if rots_done and debug_print:
+            print(f'rotated {m.name} dir={m.dir}\n{m}\n')
+            
 
         for (x,y) in m.get_points():
             
@@ -129,20 +146,29 @@ class Matrix:
                 if empty < y: # move it
                     m.set(x, y, '.')
                     m.set(x, empty, 'O')
-
-
-        while d != Direction.N:
-            m = m.rotate()
-            d = d.rotate(90)
+        
+        if rots_done > 0:
+            if debug_print:
+                print(f'before re-rotated {m.name} dir={m.dir}\n{m}\n')
+            while m.dir != org_dir:
+                m = m.rotate()
+                
+            # rots_needed = 4-rots_done
+            # while rots_needed > 0:
+            #     m = m.rotate()
+            #     rots_needed -= 1
+            if debug_print:
+                print(f'rotated {m.name} dir={m.dir}\n{m}\n')
 
         return m
 
     @staticmethod
-    def calc_force(m, d:Direction) -> int:
+    def calc_force(m, d:Direction, debug_print:bool = True) -> int:
         while d != Direction.S:
             m = m.rotate()
             d = d.rotate(90)
-            print(f'calc {m.name} dir {m.dir}\n{m}\n')
+            if debug_print:
+                print(f'calc {m.name} dir {m.dir}\n{m}\n')
             
         F = 0
         for row in m.line_range():
@@ -153,3 +179,55 @@ class Matrix:
                     F += row
                             
         return F
+    
+
+    @staticmethod
+    def spin_cycle(m:Self, debug_print:bool = True) -> Self:
+        for dir in [Direction.N,Direction.W,Direction.S,Direction.E]:
+            m = Matrix.tilt(m, dir, debug_print)
+        return m
+
+
+    @staticmethod
+    def spin_many_times_force_north(m:Self, spin_count:int, debug_print:bool = True) -> int:
+        def print_debug(s:str):
+            if debug_print:
+                print(s)
+                
+        i = 0
+        cached = {}
+        m2 = m
+        force_2 = -1
+        m_last = None
+        max_spins = spin_count
+        extra_spins = -1
+        for i in range(max_spins):
+        
+            k1 = m2.hashstr()
+            cnt = cached.get(k1)
+            # force_2 = Matrix.calc_force(m2, Direction.N, False)
+            if cnt is None:
+                print_debug(f'force_2:{force_2} after {i} spin cycles ')    ## sum1:19608  sum2:26180
+                cached[k1] = i
+            elif extra_spins < 0:
+                cycle = i-cnt
+                print(f'after {i} spin cycles (cycle detected, at {cnt} len={cycle})')    ## sum1:19608  sum2:26180                
+                max_spins -= cnt
+                extra_spins = max_spins % cycle   -1              
+            elif extra_spins > 0:
+                print_debug(f'force_2:{force_2} after {i} spin cycles (need {extra_spins} more)')    ## sum1:19608  sum2:26180                
+                extra_spins -= 1
+            else: # extra_spins == 0:
+                force_2 = Matrix.calc_force(m_last, Direction.N, False)
+                print(f'force_2:{force_2} after {i} spin cycles (cnt={cnt}, diff={i-cnt})')    ## sum1:19608  sum2:26180                
+                return force_2
+
+
+            m3 = Matrix.spin_cycle(m2, False)
+        
+            if m3 == m2:
+                break
+            m2 = m3
+            m_last = m2
+        
+            print_debug(f'\nstep {i}\n{m2}')        

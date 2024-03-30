@@ -14,14 +14,19 @@ def main():
     m = Matrix("m", input_str)
     # print(f'calc {m.name} dir=N\n{m}\n')
         
-    tilted = Matrix.tilt(m, Direction.N)
+    tilted = Matrix.tilt(m, Direction.N, True)
     tilted.name = 'tilted'
     print(f'tilt {tilted.name} dir={tilted.dir}\n{tilted}')
     
     force_1 = Matrix.calc_force(tilted, Direction.N)
-    force_2 = 0  
+    force_2 = Matrix.spin_many_times_force_north(m, 1000000000, False)
+
         
-    print(f'force_1:{force_1}  force_2:{force_2}')    ## sum1:19608  sum2:26180
+    print(f'force_1:{force_1}  force_2:{force_2} ')  
+    
+    # after 141 spin cycles (cycle detected, at 107 len=34)
+    # force_2:90551 after 160 spin cycles (cnt=126, diff=34)
+    # force_1:110677  force_2:90551
 
 if __name__ == '__main__':
     main()
