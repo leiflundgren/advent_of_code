@@ -40,3 +40,12 @@ class HashMap():
             return self.add(str[:-2], int(str[-1]))
         else:
             raise ValueError(f'Invalid input str "{str}"')
+        
+
+    def calc_focal_length_box(self, box : list[tuple[str, int]]) -> int:
+        return sum([ i*foclen for (i, (label, foclen)) in zip(range(1, 1+len(box)), box) ])
+    
+    def calc_focal_length_total(self):
+        return sum([ i * self.calc_focal_length_box(box) for (i, box) in zip(range(1, 1+len(self.data)), self.data)])
+    
+            

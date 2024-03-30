@@ -39,6 +39,10 @@ class Tests(unittest.TestCase):
         self.assertEqual([('rn', 1), ('cm', 2)], hmap.data[0])
         self.assertEqual([('ot', 7), ('ab', 5), ('pc', 6)], hmap.data[3])
 
+        self.assertEqual(5, hmap.calc_focal_length_box(hmap.data[0]))
+        self.assertEqual(28+40+72, 4*hmap.calc_focal_length_box(hmap.data[3]))
+        self.assertEqual(145, hmap.calc_focal_length_total())
+
 if __name__ == '__main__':
 
     unittest.main()
