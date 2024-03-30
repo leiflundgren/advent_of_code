@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import prog 
 import tools
+from hashmap import HashMap
 
 # entry point
 def main():
@@ -10,7 +11,14 @@ def main():
     input_str = Path(input_txt).read_text()
 
     sum1 = prog.sum_hash_line(input_str)
-    sum2 = 4711
+
+    operations = prog.split_input(input_str)
+    hmap = HashMap()
+    for op in operations:
+        hmap.perform_operation(op)
+            
+    sum2 = hmap.calc_focal_length_total()
+
     print(f'sum1:{sum1}  sum2:{sum2} ')  # sum1:517965  sum2:xxx
     
     # after 141 spin cycles (cycle detected, at 107 len=34)
