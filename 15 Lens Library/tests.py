@@ -23,6 +23,13 @@ class Tests(unittest.TestCase):
             h = prog.calc_hash(input)    
             self.assertEqual(expected, h)
 
+    def test_parsing(self):
+        str = 'rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7'
+        h = prog.sum_hash_line(str)
+        self.assertEqual(1320, h)
+        
+
 if __name__ == '__main__':
+
     unittest.main()
     

@@ -12,3 +12,6 @@ def calc_hash(s:str) -> int:
         h *= 17
         h = (h%256)
     return h
+
+def sum_hash_line(s:str) -> int:
+    return sum( map(calc_hash, split_input(s)))
