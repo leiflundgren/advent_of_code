@@ -8,7 +8,7 @@ class Direction:
         self.angle = angle
                 
     def __eq__(self, x: object) -> bool:
-        return not x is None and self.dir == (x if isinstance(x, str) else x.dir)
+        return not x is None and (self.dir == x if isinstance(x, str) else self.angle == x.angle)
 
     def __repr__(self) -> str:
         return f'dir:{self.dir}'
@@ -85,7 +85,8 @@ class Direction:
     def eight_dir(cls):
         return [Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW]
 
-
+  
+    
 #def angle_dir(d1:str, d2:str) -> str
 # 
 def direction(p1:tuple[int,int], p2:tuple[int,int]) -> str:

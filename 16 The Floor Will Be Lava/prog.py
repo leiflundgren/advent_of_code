@@ -1,6 +1,9 @@
+from collections import deque
 from contextlib import redirect_stdout
 from itertools import count
 import itertools
+from operator import contains
+import queue
 from re import S
 import tools
 import copy
@@ -11,33 +14,88 @@ from directions import Direction
 def create_matrix(rows:int, cols:int, v):
     return [([v]*cols) for i in range(rows)]
 
+color_Red = '91m'
+color_Green = '92m'
+color_Yellow = '93m'
+color_LightPurple = '94m'
+color_Purple = '95m'
+color_Cyan = '96m'
+color_LightGray = '97m'
+color_Black = '98m'
+color_white = '00m'
+
+
+def prRed(skk): print("\033[91m {}\033[00m" .format(skk))
+def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
+def prYellow(skk): print("\033[93m {}\033[00m" .format(skk))
+def prLightPurple(skk): print("\033[94m {}\033[00m" .format(skk))
+def prPurple(skk): print("\033[95m {}\033[00m" .format(skk))
+def prCyan(skk): print("\033[96m {}\033[00m" .format(skk))
+def prLightGray(skk): print("\033[97m {}\033[00m" .format(skk))
+def prBlack(skk): print("\033[98m {}\033[00m" .format(skk))
+
+def format_with_color(s:str, color:str) -> str:
+    if color == '00m':
+        return s
+    else:
+        return f"\033[{color}{s}\033[00m"
+    
+
+class Element:
+    def __init__(self, c:str, color:str = color_white):
+        self.c = c
+        self.color = color
+
+    def __str__(self): return self.c
+    
+    def __repr__(self):
+    #     return format_with_color(self.c, self.color)
+        return self.c    
+        
+    def __eq__(self, __value: object) -> bool:
+        return self.c == (__value if isinstance(__value, str) else __value.c)
+    
+    def asColorCoded(self) -> str:
+        return format_with_color(self.c, self.color)
+
 class Matrix:
     def __init__(self, name:str, src : list[str], dir:Direction = Direction.N):
         assert isinstance(name, str)
         self.name = name
-        self.data = list(map(lambda s: list(s), src))
+        self.data : list[list[Element]] = [ [Element(c) for c in s] for s in src]
         self.dir = dir
         self.lines_equals = Matrix.lines_exactly_equal
+        for (x,y) in self.get_points():
+            self.get(x,y).pos = (x,y)
 
     def clone(self) -> Self:
         data = copy.deepcopy(self.data)
         return Matrix(self.name, data, self.dir)
 
     # get 1-indexed
-    def getLine(self, i : int) -> list[str]:
+    def getLine(self, i : int) -> list[Element]:
         return self.data[i-1]
 
-    def get(self, x, y):
+    def get(self, t1, t2 = None) -> Element:
+        (x,y) = t1 if isinstance(t1, tuple) else (t1, t2)
         return self.data[y-1][x-1]
 
-    def set(self, x, y, v):
-        self.data[y-1][x-1] = v
+    def set(self, x, y, v, color:str = None):
+        el = self.data[y-1][x-1]
+        el.c = v
+        if not color is None:
+            el.color = color
 
     def get_width(self):
         return len(self.data[0])
     def get_height(self):
         return len(self.data)
         
+    def as_plain_text(self) -> str:
+        return '\n'.join(map(lambda row: ''.join(map(lambda el: el.c, row)), self.data))
+    def as_color_text(self) -> str:
+        return '\n'.join(map(lambda row: ''.join(map(lambda el: el.asColorCoded(), row)), self.data))
+
     def __str__(self) -> str:
         return '\n'.join(map(lambda row: ''.join(row), self.data))
     
@@ -119,115 +177,68 @@ class Matrix:
         # y = list(map(lambda i: ''.join([ self.data[j][i] for j in range(self.get_height()) ]), range(len(self.data[0]))))
         # return Matrix(self.name, y, self.dir)
 
-    @staticmethod
-    def tilt(m:Self, dir:Direction, debug_print:bool = True) -> Self:
-        m = m.clone() 
-        org_dir = m.dir
+    def find_next(self, pos:tuple[int,int], dir0:Direction) -> list[tuple[int, int]]:
+         
+        (px, py) = pos
+        el = self.get(pos)
+        dirs = dir0.move_light_beam(el.c)
+        offsets = [d.offset_dir() for d in dirs ]
         
-        rots_done = 0
-        while m.dir != dir:
-            m = m.rotate()
-            rots_done += 1
-        if rots_done and debug_print:
-            print(f'rotated {m.name} dir={m.dir}\n{m}\n')
-            
-
-        for (x,y) in m.get_points():
-            
-            if y == 1: continue # first line, already tilted
-
-            if m.get(x,y) == 'O':
-                empty = y
-                for i in range(y-1, 0, -1):
-                    if m.get(x, i) == '.':
-                        empty = i
-                    else:
-                        break
-                if empty < y: # move it
-                    m.set(x, y, '.')
-                    m.set(x, empty, 'O')
+        offset_pos = [ (px+ox,py+oy) for (ox,oy) in offsets]        
         
-        if rots_done > 0:
-            if debug_print:
-                print(f'before re-rotated {m.name} dir={m.dir}\n{m}\n')
-            while m.dir != org_dir:
-                m = m.rotate()
-                
-            # rots_needed = 4-rots_done
-            # while rots_needed > 0:
-            #     m = m.rotate()
-            #     rots_needed -= 1
-            if debug_print:
-                print(f'rotated {m.name} dir={m.dir}\n{m}\n')
-
-        return m
-
-    @staticmethod
-    def calc_force(m, d:Direction, debug_print:bool = True) -> int:
-        while d != Direction.S:
-            m = m.rotate()
-            d = d.rotate(90)
-            if debug_print:
-                print(f'calc {m.name} dir {m.dir}\n{m}\n')
-            
-        F = 0
-        for row in m.line_range():
-            #F += line * itertools.count(filter(lambda chr: chr=='O', m.getLine(line)))
-            line = m.getLine(row)
-            for chr in line:
-                if chr == 'O':
-                    F += row
-                            
-        return F
+        res = []
+        for ((x, y), dir) in zip(offset_pos, dirs):
+            if x>=1 and y >= 1 and x <= self.get_width() and y <= self.get_height():
+                res.append(((x,y), dir))
+        
+        return res
     
+    def trace_path(self, pos:tuple[int,int], dir:Direction) -> list[tuple[tuple[int, int], Direction]]:
+        res = []
+        work = deque()
+        work.append((pos, dir))
+        
+        while len(work) > 0:
+            (pos, dir) = work.pop()
+            
+            if contains(res, (pos, dir)):
+                continue
+            
+            res.append((pos, dir))
+            
+            next_ls = self.find_next(pos, dir)
+            work += next_ls
+            
+        return res
 
-    @staticmethod
-    def spin_cycle(m:Self, debug_print:bool = True) -> Self:
-        for dir in [Direction.N,Direction.W,Direction.S,Direction.E]:
-            m = Matrix.tilt(m, dir, debug_print)
-        return m
+    def color_mark(self, points:list[tuple[int,int]], color:str):
+        for (x,y) in points:
+            self.get(x,y).color = color
 
-
-    @staticmethod
-    def spin_many_times_force_north(m:Self, spin_count:int, debug_print:bool = True) -> int:
-        def print_debug(s:str):
-            if debug_print:
-                print(s)
+    def count_empty_tiles(self, points:list[tuple[int,int]]):
+        sum_ =0
+        
+        for ((x,y),d) in points:
+            el = self.get(x,y).c
+            if el == '.':
+                sum_ += 1
+            elif el == Direction.char_vertial and d.is_vertical():
+                sum_ += 1
+            elif el == Direction.char_horizontal and d.is_horizontal():
+                sum_ += 1
+            else:
+                pass
                 
-        i = 0
-        cached = {}
-        m2 = m
-        force_2 = -1
-        m_last = None
-        max_spins = spin_count
-        extra_spins = -1
-        for i in range(max_spins):
+        return sum_
+
+    # loosing information about direction (uniq points)
+    @staticmethod 
+    def path_to_points(input : list[tuple[tuple[int, int], Direction]]) -> list[tuple[int, int]]:
+        res = set()
         
-            k1 = m2.hashstr()
-            cnt = cached.get(k1)
-            # force_2 = Matrix.calc_force(m2, Direction.N, False)
-            if cnt is None:
-                print_debug(f'force_2:{force_2} after {i} spin cycles ')    ## sum1:19608  sum2:26180
-                cached[k1] = i
-            elif extra_spins < 0:
-                cycle = i-cnt
-                print(f'after {i} spin cycles (cycle detected, at {cnt} len={cycle})')    ## sum1:19608  sum2:26180                
-                max_spins -= cnt
-                extra_spins = max_spins % cycle   -1              
-            elif extra_spins > 0:
-                print_debug(f'force_2:{force_2} after {i} spin cycles (need {extra_spins} more)')    ## sum1:19608  sum2:26180                
-                extra_spins -= 1
-            else: # extra_spins == 0:
-                force_2 = Matrix.calc_force(m_last, Direction.N, False)
-                print(f'force_2:{force_2} after {i} spin cycles (cnt={cnt}, diff={i-cnt})')    ## sum1:19608  sum2:26180                
-                return force_2
+        for (pos, dir) in input:
+            res.add(pos)
+            
+        return list(res)
 
 
-            m3 = Matrix.spin_cycle(m2, False)
-        
-            if m3 == m2:
-                break
-            m2 = m3
-            m_last = m2
-        
-            print_debug(f'\nstep {i}\n{m2}')        

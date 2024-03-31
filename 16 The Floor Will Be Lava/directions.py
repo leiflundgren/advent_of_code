@@ -21,6 +21,11 @@ class Direction:
         return self.rotate(-90)
     def right(self) -> Self :
         return self.rotate(90)
+    
+    def is_vertical(self) -> bool:
+        return self == Direction.N or self == Direction.S
+    def is_horizontal(self) -> bool:
+        return self == Direction.E or self == Direction.W
 
     def rotate(self, angle:int) -> Self:
         idx = Direction.eight_dir.index(self)
@@ -42,7 +47,42 @@ class Direction:
         if self == Direction.NW: return (-1, -1)
         raise ValueError(f'Innvalid direction {dir}')
 
-
+    def mirror(self, typ:str) -> Self:
+        if typ != '╱' and typ != '╲':
+            raise ValueError(f'Mirror should be one of ╲, ╱  got "{typ}"')
+        
+        if self == Direction.N:
+            return  Direction.E if typ == '╱' else Direction.W
+        elif self == Direction.E:
+            return  Direction.N if typ == '╱' else Direction.S
+        elif self == Direction.S:
+            return  Direction.W if typ == '╱' else Direction.E
+        elif self == Direction.W:
+            return  Direction.S if typ == '╱' else Direction.N
+        else:
+            raise ValueError(f'Mirror only handles N/W/S/E got "{self}"')
+            
+    def splitter(self, typ:str) -> list[Self]:
+        if typ != '|' and typ != '⎯':
+            raise ValueError(f'Splitter should be one of |, -  got "{typ}"')
+        
+        if self == Direction.N or self == Direction.S:
+            return [self] if typ == '|' else [Direction.W, Direction.E]
+        elif self == Direction.E or self == Direction.W:
+            return [self] if typ == '⎯' else [Direction.N, Direction.S]
+        else:
+            raise ValueError(f'Mirror only handles N/W/S/E got "{self}"')
+            
+    def move_light_beam(self, typ:str) -> list[Self]:
+        if typ == '.':
+            return [self]
+        elif typ == '╱' or typ == '╲':
+            return [self.mirror(typ)]
+        elif typ == '|' or typ == '⎯':
+            return self.splitter(typ)
+        else:
+            raise ValueError(f'Mirror only handles N/W/S/E got "{typ}"')
+        
     @classmethod
     @property
     def N(cls):
@@ -85,6 +125,22 @@ class Direction:
     def eight_dir(cls):
         return [Direction.N, Direction.NE, Direction.E, Direction.SE, Direction.S, Direction.SW, Direction.W, Direction.NW]
 
+    @classmethod
+    @property
+    def char_vertial(cls): return '|'
+    
+    @classmethod
+    @property
+    def char_horizontal(cls): return '⎯'
+    
+    @classmethod
+    @property
+    def char_forward_angle(cls): return '╱'
+    
+    @classmethod
+    @property
+    def char_back_angle(cls): return '╲'
+    
 
 #def angle_dir(d1:str, d2:str) -> str
 # 
