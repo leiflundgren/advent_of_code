@@ -20,6 +20,6 @@ static INPUT_MAP: &str = r#"
 
 #[test]
 fn test_parse() {
-    m = parse_map(INPUT_MAP);
-    assert_ne!(m, None);
+    let m : Map = parse_map(INPUT_MAP);
+    assert!(! n.is_none())
 }
