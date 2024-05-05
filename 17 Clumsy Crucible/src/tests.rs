@@ -2,16 +2,24 @@
 // Note this useful idiom: importing names from outer (for mod tests) scope.
 use super::*;
 
+static INPUT_MAP: &str = r#"
+2413432311323
+3215453535623
+3255245654254
+3446585845452
+4546657867536
+1438598798454
+4457876987766
+3637877979653
+4654967986887
+4564679986453
+1224686865563
+2546548887735
+4322674655533"#;
 
 
 #[test]
-fn test_add() {
-    assert_eq!(add(1, 2), 3);
-}
-
-#[test]
-fn test_bad_add() {
-    // This assert would fire and test will fail.
-    // Please note, that private functions can be tested too!
-    assert_eq!(bad_add(1, 2), 3);
+fn test_parse() {
+    m = parse_map(INPUT_MAP);
+    assert_ne!(m, None);
 }
