@@ -15,13 +15,13 @@
         "name": "Run Test Debugger",
         "type": "cppvsdbg",
         "request": "launch",
-        "program": "${workspaceFolder}/target/debug/day17_Clumsy_Crucible.exe",
-        "args": [],
+        "program": "cargo",
+        "args": ["test", "build"],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
         "environment": [],
         "externalConsole": true,
-        "preLaunchTask": "cargo test build",
+        "preLaunchTask": "",
     }
     ],
 }
