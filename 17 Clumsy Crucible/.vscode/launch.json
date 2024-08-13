@@ -16,7 +16,7 @@
         "type": "cppvsdbg",
         "request": "launch",
         "program": "cargo",
-        "args": ["test", "build"],
+        "args": ["test", "test"],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}",
         "environment": [],
