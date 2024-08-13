@@ -6,6 +6,7 @@ use std::str::Lines;
 use array2d::Array2D;
 
 #[derive(Copy, Clone)]
+#[derive(Debug)]
 enum State {
     Normal,
     Visited,
@@ -18,6 +19,7 @@ enum State {
 
 
 #[derive(Copy, Clone)]
+#[derive(Debug)]
 struct Node {
     cost:u32,
     state:State,
@@ -34,6 +36,8 @@ impl Default for Node {
 }
 
 
+#[derive(Debug)]
+#[derive(Copy, Clone)]
 struct Coord {
     x:usize,
     y:usize,
@@ -47,6 +51,7 @@ struct Coord {
 //     }
 // }
 
+#[derive(Debug)]
 struct Map {
     nodes:Array2D<Node>,
 
@@ -61,24 +66,31 @@ impl Map {
         self.nodes.set(pos.y, pos.x, n);
     }
     pub fn get(&self, pos:Coord) -> Option<&Node> {
-        return self.nodes.get(pos.x, pos.y);
+        return self.nodes.get(pos.y, pos.x);
     }
     pub fn is_empty(&self) -> bool {
         return self.nodes.row_len() <= 0;
     }
 }
 
-fn parse_map(s:&str) -> Map {
+fn parse_map(s0:&str) -> Map {
+    let s = s0.trim();
     let lines: Vec<&str> = s.lines().collect();
-    let mut m : Map = Map::new(lines.len(), lines[0].len());
+    let width = lines[0].trim().len();
+    let height = lines.len();
+    let mut m : Map = Map::new(width, height);
     let mut y=0;
+ 
     lines.iter().for_each(|line: &&str| {
         let mut x = 0;
         line.chars().for_each(|c:char| {
-            let d = c.to_digit(10).unwrap();
-            let n = Node::new(d);
-            m.set(Coord { x: x, y: y }, n);
-            x+=1;
+            let p = c.to_digit(10);
+            if p.is_some() {
+                let d = p.unwrap();
+                let n = Node::new(d);
+                m.set(Coord { x: x, y: y }, n);
+                x+=1;
+            }
         });
         y+=1;
     });
@@ -118,7 +130,22 @@ mod tests {
     #[test]
     fn test_parse() {
         let m : Map = parse_map(INPUT_MAP);
-        assert!(! m.is_empty())
+        assert!(! m.is_empty());
+
+        {
+            let c = Coord{ x:1, y:1};
+            let n = m.get(c);
+            assert!(n.is_some());
+            assert_eq!(2, n.unwrap().cost);
+        }
+
+
+        {
+            let c = Coord{ x:2, y:1};
+            let n = m.get(c);
+            assert!(n.is_some());
+            assert_eq!(1, n.unwrap().cost);
+        }
     }
 
 }
