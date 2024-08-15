@@ -1,4 +1,4 @@
-mod lib {
+mod map {
 
 #[allow(unused_imports)]
 use std::str::Lines;
@@ -71,32 +71,33 @@ impl Map {
     pub fn is_empty(&self) -> bool {
         return self.nodes.row_len() <= 0;
     }
-}
 
-fn parse_map(s0:&str) -> Map {
-    let s = s0.trim();
-    let lines: Vec<&str> = s.lines().collect();
-    let width = lines[0].trim().len();
-    let height = lines.len();
-    let mut m : Map = Map::new(width, height);
-    let mut y=0;
- 
-    lines.iter().for_each(|line: &&str| {
-        let mut x = 0;
-        line.chars().for_each(|c:char| {
-            let p = c.to_digit(10);
-            if p.is_some() {
-                let d = p.unwrap();
-                let n = Node::new(d);
-                m.set(Coord { x: x, y: y }, n);
-                x+=1;
-            }
+
+    fn parse(s0:&str) -> Self {
+        let s = s0.trim();
+        let lines: Vec<&str> = s.lines().collect();
+        let width = lines[0].trim().len();
+        let height = lines.len();
+        let mut m : Map = Self::new(width, height);
+        let mut y=0;
+    
+        lines.iter().for_each(|line: &&str| {
+            let mut x = 0;
+            line.chars().for_each(|c:char| {
+                let p = c.to_digit(10);
+                if p.is_some() {
+                    let d = p.unwrap();
+                    let n = Node::new(d);
+                    m.set(Coord { x: x, y: y }, n);
+                    x+=1;
+                }
+            });
+            y+=1;
         });
-        y+=1;
-    });
-    return m;
-}
+        return m;
+    }
 
+}
 
 #[cfg(test)]
 mod tests {
@@ -129,7 +130,7 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let m : Map = parse_map(INPUT_MAP);
+        let m : Map = Map::parse(INPUT_MAP);
         assert!(! m.is_empty());
 
         {

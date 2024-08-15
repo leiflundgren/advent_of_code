@@ -1,9 +1,9 @@
 
-mod mylist;
+mod list;
 
 fn main() {
     println!("Hello, world!");
-    let mut ls = mylist::List::new();
+    let mut ls = list::List::new();
     ls.push(4);
 }
 

@@ -16,7 +16,7 @@ enum_glob_use = "deny"
 [workspace]
 
 members = [
-    "src/mylist.rs",
-    "src/lib.rs",
+    "src/list.rs",
+    "src/map.rs",
     "src/main.rs"
 ]
