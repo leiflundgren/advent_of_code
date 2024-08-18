@@ -1,3 +1,5 @@
+//mod list {
+
 
 use std::mem;
 
@@ -38,6 +40,38 @@ impl<T> List<T> {
             }
         }
     }
+
+    pub fn peek(&self, depth:i32) -> Option<&T> {
+
+        let mut lnk = &self.head;
+        let mut r : Option<&T> = None;
+
+        for n in 0..depth+1  {
+            r = match lnk {
+                Link::Empty =>  None,
+                Link::More(node) => {
+                    lnk = &node.next;
+                    Some(&node.elem)
+                }
+            }
+        }
+        return r
+    }
+
+    
+    pub fn len(&self) -> i32 {
+
+        fn len_inner<T>(lnk: &Link<T>) -> i32 {
+            match lnk {
+                Link::Empty => return 0,
+                Link::More(node) => 1 + len_inner(&node.next)
+            }
+        }
+        let mut lnk = &self.head;
+        return len_inner(lnk);
+    }
+
+
 }
 
 impl<T> Drop for List<T> {
@@ -61,10 +95,24 @@ mod test {
         // Check empty list behaves right
         assert_eq!(list.pop(), None);
 
+        assert_eq!(list.len(), 0);
+
         // Populate list
         list.push(1);
         list.push(2);
         list.push(3);
+
+        assert_eq!(list.len(), 3);
+
+        let n0 = list.peek(0);
+        let s0: &i32 = n0.unwrap_or(& -1);
+
+        assert_eq!(list.peek(0), Some(&3));
+        assert_eq!(list.peek(1), Some(&2));
+        assert_eq!(list.peek(2), Some(&1));
+        assert_eq!(list.peek(3), None);
+        assert_eq!(*list.peek(3).unwrap_or(&-1), -1);
+
 
         // Check normal removal
         assert_eq!(list.pop(), Some(3));
@@ -82,4 +130,5 @@ mod test {
         assert_eq!(list.pop(), Some(1));
         assert_eq!(list.pop(), None);
     }
-}
+} 
+// } 

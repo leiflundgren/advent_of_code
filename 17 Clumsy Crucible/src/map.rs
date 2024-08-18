@@ -1,4 +1,4 @@
-mod map {
+//mod map {
 
 #[allow(unused_imports)]
 use std::str::Lines;
@@ -120,11 +120,11 @@ mod tests {
     4564679986453
     1224686865563
     2546548887735
-    4322674655533"#;
+    4322674655533"#.trim();
 
     #[test]
     fn test_hello_world() {
-        println!("Hello, test!"); 
+        println!("Hello, tst!"); 
     }
 
 
@@ -149,5 +149,5 @@ mod tests {
         }
     }
 
-}
-}
+} mod test;
+//} mod map;
