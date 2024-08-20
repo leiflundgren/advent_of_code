@@ -18,5 +18,6 @@ enum_glob_use = "deny"
 members = [
     "src/list.rs",
     "src/map.rs",
+    "src/path.rs",
     "src/main.rs"
 ]

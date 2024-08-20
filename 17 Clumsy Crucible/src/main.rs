@@ -1,5 +1,7 @@
 
 mod list;
+mod path;
+mod map;
 
 fn main() {
     println!("Hello, world!");
