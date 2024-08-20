@@ -1,8 +1,8 @@
-use crate::list::List;
-use crate::list::Link;
-use crate::list::Node;
+use std::{collections::VecDeque, mem};
+
 use crate::map;
 
+#[derive(PartialEq, Copy, Clone)]
 pub enum Direction {
     North,
     East,
@@ -31,36 +31,78 @@ pub fn get_direction(n1:&PathNode, n2:&PathNode) -> Direction {
 }
 
 pub struct Path {
-    head : List<PathNode>
+    head : VecDeque<PathNode>
 }
 
 impl Path {
     pub fn new() -> Self {
-        Path { head : List::new() }
+        Path { head : VecDeque::new() }
     }
 
-    pub fn get_direction(& self, depth:i32) -> Direction {
-        let mut lnk = &self.head;
-
-        for n in 0..depth  {
-            match lnk {
-                Link::Empty => None,
-                Link::More(node) => {
-                    lnk = &node.next;
-                }
-            }
+    pub fn get_direction(& self, depth:usize) -> Direction {
+        
+        if depth == 0 { 
+            Direction::South 
         }
-
-        match self.head.peek(0) {
-            Link::Empty => Direction::South,
-            Link::More(node) => *node.elem            
+        else if depth <= self.head.len() {
+            let n1 = self.head.get(depth-1).unwrap();
+            let n2 = self.head.get(depth).unwrap();
+            get_direction(n1, n2)
         }
+        else { 
+            panic!("Attempt to get depth {depth} when list.len is {len}", depth=depth, len=self.head.len())
+        }        
     }
 
-    // pub fn sameDirectionLast
+    // If we have travelled same direction last `depth` steps, return that direction. None otherwise.
+    pub fn same_direction_last(& self, depth:usize) -> Option<Direction> {
+        if depth <1 { return  None; }
+        if self.head.len() < depth { return None; }
 
-    pub fn possible_next_all(& self) {
-        not_impl!()
+        let mut n0 : &PathNode = self.head.get(0).unwrap();
+        let mut n1 : &PathNode = self.head.get(1).unwrap();
+
+        let mut d1 = get_direction(n0, n1);
+        
+        for i in 2..depth {            
+            let n2 = self.head.get(i).unwrap();
+            let d2 = get_direction(n1, n2);
+            if d1 != d2 { return None; } // changed dir within depth
+
+            n1 = n2;
+            d1 = d2;
+        }
+
+        return Some(d1);
+    }
+
+    pub fn possible_next_all(& self, x:usize, y:usize, max_x:usize, max_y:usize) -> Vec<Direction> {
+        let repeat_dir = self.same_direction_last(3);
+        let mut dirs : Vec<Direction> = vec![Direction::North, Direction::East, Direction::West, Direction::South];
+
+        dirs
+        .retain(|&d| 
+            match repeat_dir {
+                None => true,
+                Some(rd) => d != rd
+            }             
+            && match d {
+                    Direction::North => y > 0 ,
+                    Direction::East => x < max_x ,
+                    Direction::South => y < max_y ,
+                    Direction::West => x > 0,
+            });
+
+            // .filter(|&d| match d {
+                //     Direction::North => y > 0 && repeat_dir != Some(Direction::North),
+                //     Direction::East => x < max_x && repeat_dir != Some(Direction::East),
+                //     Direction::South => y < max_y && repeat_dir != Some(Direction::South), 
+                //     Direction::West => x > 0 && repeat_dir != Some(Direction::West),
+                // })        
+                // .collect();  
+                
+                // unimplemented!("not yet");
+                return dirs;
     }
 
 }
