@@ -1,6 +1,7 @@
 use std::{collections::VecDeque, fmt::{self, Debug}, mem};
 
-use crate::map;
+use crate::map::Map;
+use crate::map::Coord;
 
 #[derive(PartialEq, Copy, Clone, Debug)]
 pub enum Direction {
@@ -58,12 +59,16 @@ pub fn get_direction(o_n1:Option<&PathNode>, o_n2:Option<&PathNode>) -> Directio
 }
 
 pub struct Path {
-    head : VecDeque<PathNode>
+    head : VecDeque<PathNode>,
+    map : Map,
 }
 
 impl Path {
-    pub fn new() -> Self {
-        Path { head : VecDeque::new() }
+    /// Creates a new Path
+    /// x_min/y_min are inclusive  x_max/y_max are exclusive
+    /// I.e if the coordinates are 0--10, min value for coord i 0, max value used is 9
+    pub fn new(map: Map ) -> Self {
+        Path { head : VecDeque::new(), map : map }
     }
 
     pub fn get_direction(& self, depth:usize) -> Direction {
@@ -83,6 +88,11 @@ impl Path {
         }        
     }
 
+    pub fn get_x_min(&self) -> i32 { 0 }
+    pub fn get_y_min(&self) -> i32 { 0 }
+    pub fn get_x_max(&self) -> i32 { self.map.get_width() as i32 }
+    pub fn get_y_max(&self) -> i32 { self.map.get_height() as i32 }
+
     pub fn add_step(&mut self, x:i32, y:i32, cost:i32) {
         assert!( match self.head.front() {
             None => true,
@@ -99,11 +109,12 @@ impl Path {
         let mut n0 : Option<&PathNode> = self.head.get(0);
         let mut n1 : Option<&PathNode> = self.head.get(1);
 
-        let mut d1 = get_direction(n0, n1);
+        // Remember, nodes are stored latest first, so we moved from n1 -> n0
+        let mut d1 = get_direction(n1, n0);
         
         for i in 2..depth {            
             let n2: Option<&PathNode> = self.head.get(i);
-            let d2 = get_direction(n1, n2);
+            let d2 = get_direction(n2, n1);
             if d1 != d2 { return None; } // changed dir within depth
 
             n1 = n2;
@@ -113,7 +124,7 @@ impl Path {
         return Some(d1);
     }
 
-    pub fn possible_next_all(& self, x:usize, y:usize, max_x:usize, max_y:usize) -> Vec<Direction> {
+    pub fn possible_next_all(& self, x:i32, y:i32) -> Vec<Direction> {
         let repeat_dir = self.same_direction_last(3);
         let mut dirs : Vec<Direction> = vec![Direction::North, Direction::East, Direction::West, Direction::South];
 
@@ -124,10 +135,10 @@ impl Path {
                 Some(rd) => d != rd
             }             
             && match d {
-                    Direction::North => y > 0 ,
-                    Direction::East => x < max_x ,
-                    Direction::South => y < max_y ,
-                    Direction::West => x > 0,
+                    Direction::North => y > self.get_y_min(),
+                    Direction::West => x > self.get_x_min(),
+                    Direction::South => y+1 < self.get_y_max(),
+                    Direction::East => x+1 < self.get_x_max(),
             });
 
             // .filter(|&d| match d {
@@ -142,6 +153,17 @@ impl Path {
                 return dirs;
     }
 
+    pub fn guesstimate_cost_distance(manhattan_distance:usize, unit_cost_estimate:f32) -> f32 {
+        return unit_cost_estimate * (manhattan_distance as f32)
+    }
+
+    pub fn get_manhattan_distance(x1:i32, y1:i32, x2:i32, y2:i32) -> usize {
+        return ((x1-x2).abs() + (y1-x2).abs()) as usize
+    }
+    pub fn guesstimate_best_direction(&self) -> Direction {
+        unimplemented!("not get");
+    }
+
 }
 
 #[cfg(test)]
@@ -150,9 +172,29 @@ mod test {
 
     use super::*;
 
+    static INPUT_MAP: &str = r#"
+    2413432311323
+    3215453535623
+    3255245654254
+    3446585845452
+    4546657867536
+    1438598798454
+    4457876987766
+    3637877979653
+    4654967986887
+    4564679986453
+    1224686865563
+    2546548887735
+    4322674655533"#;
+
+    fn parse_test_map() -> Map {
+        return Map::parse(INPUT_MAP)
+    }
+
     #[test]
     fn basics() {
-        let mut p = Path::new();
+        let test_map : Map = parse_test_map();
+        let mut p = Path::new(test_map);
 
         p.add_step(0, 0,10);
 
@@ -177,12 +219,15 @@ mod test {
         assert_eq!(p.get_direction(3), Direction::South);
 
         p.add_step(0, 0,20);
-
+        
         assert_eq!(p.get_direction(0), Direction::West);
         assert_eq!(p.get_direction(1), Direction::North);
         assert_eq!(p.get_direction(2), Direction::East);
         assert_eq!(p.get_direction(3), Direction::South);
         assert_eq!(p.get_direction(4), Direction::South);
+        
+        let possible = p.possible_next_all(1, 0);
+        assert_eq!(possible, vec![Direction::East, Direction::West, Direction::South]);
 
         // // Populate list
         // list.push(1);
@@ -204,5 +249,38 @@ mod test {
         // // Check exhaustion
         // assert_eq!(list.pop(), Some(1));
         // assert_eq!(list.pop(), None);
+    }
+
+    #[test]
+    fn same_direction_last() {
+        let test_map : Map = parse_test_map();
+        let mut p = Path::new(test_map);
+
+        
+        let mut d: Option<Direction> = None;
+        d = p.same_direction_last(1);
+        assert_eq!(None, d);
+
+        p.add_step(0, 0,10);
+        d = p.same_direction_last(1);
+        assert_eq!(None, d);
+
+        p.add_step(0, 1,20);
+        assert_eq!(Some(Direction::South), p.same_direction_last(1));
+
+        p.add_step(0, 2,20);
+        assert_eq!(Some(Direction::South), p.same_direction_last(1));
+        assert_eq!(Some(Direction::South), p.same_direction_last(2));
+
+        p.add_step(0, 2,20);
+        assert_eq!(Some(Direction::South), p.same_direction_last(1));
+        assert_eq!(Some(Direction::South), p.same_direction_last(2));
+        assert_eq!(Some(Direction::South), p.same_direction_last(3));
+
+        p.add_step(1, 2,20);
+        assert_eq!(None, p.same_direction_last(1));
+        assert_eq!(Some(Direction::South), p.same_direction_last(2));
+        assert_eq!(Some(Direction::South), p.same_direction_last(3));
+
     }
 } 

@@ -18,27 +18,10 @@ enum State {
 // }
 
 
-#[derive(Copy, Clone)]
-#[derive(Debug)]
-struct Node {
-    cost:u32,
-    state:State,
-}
-impl Node {
-    pub fn new(cost:u32) -> Self {
-        Node { cost:cost, state:State::Normal }
-    }
-}
-impl Default for Node {
-    fn default() -> Self {
-        Node::new(0)
-    }
-}
-
 
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-struct Coord {
+pub struct Coord {
     x:usize,
     y:usize,
 }
@@ -52,28 +35,30 @@ struct Coord {
 // }
 
 #[derive(Debug)]
-struct Map {
-    nodes:Array2D<Node>,
+pub struct Map {
+    nodes:Array2D<i32>,
 
 }
 impl Map {
     pub fn new(width:usize, height:usize) -> Self {
         Self {
-            nodes : Array2D::filled_with(Node::default(), height, width),
+            nodes : Array2D::filled_with(0, height, width),
         }
     }
-    pub fn set(&mut self, pos:Coord, n:Node) -> () {
-        self.nodes.set(pos.y, pos.x, n);
+    pub fn set(&mut self, pos:Coord, cost:i32) -> () {
+        self.nodes.set(pos.y, pos.x, cost);
     }
-    pub fn get(&self, pos:Coord) -> Option<&Node> {
+    pub fn get(&self, pos:Coord) -> Option<&i32> {
         return self.nodes.get(pos.y, pos.x);
     }
     pub fn is_empty(&self) -> bool {
         return self.nodes.row_len() <= 0;
     }
 
+    pub fn get_height(&self) -> usize { return self.nodes.row_len() }
+    pub fn get_width(&self) -> usize { return self.nodes.column_len() }
 
-    fn parse(s0:&str) -> Self {
+    pub fn parse(s0:&str) -> Self {
         let s = s0.trim();
         let lines: Vec<&str> = s.lines().collect();
         let width = lines[0].trim().len();
@@ -86,9 +71,7 @@ impl Map {
             line.chars().for_each(|c:char| {
                 let p = c.to_digit(10);
                 if p.is_some() {
-                    let d = p.unwrap();
-                    let n = Node::new(d);
-                    m.set(Coord { x: x, y: y }, n);
+                    m.set(Coord { x: x, y: y }, p.unwrap() as i32);
                     x+=1;
                 }
             });
@@ -127,17 +110,20 @@ mod tests {
         println!("Hello, tst!"); 
     }
 
+    fn parse_test_map() -> Map {
+        return Map::parse(INPUT_MAP)
+    }
 
     #[test]
     fn test_parse() {
-        let m : Map = Map::parse(INPUT_MAP);
+        let m : Map = parse_test_map();
         assert!(! m.is_empty());
 
         {
             let c = Coord{ x:1, y:1};
             let n = m.get(c);
             assert!(n.is_some());
-            assert_eq!(2, n.unwrap().cost);
+            assert_eq!(2, *n.unwrap());
         }
 
 
@@ -145,7 +131,7 @@ mod tests {
             let c = Coord{ x:2, y:1};
             let n = m.get(c);
             assert!(n.is_some());
-            assert_eq!(1, n.unwrap().cost);
+            assert_eq!(1, *n.unwrap());
         }
     }
 
