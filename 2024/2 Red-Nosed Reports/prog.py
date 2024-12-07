@@ -6,10 +6,10 @@ from typing import Iterable, Iterator, List, Self, Sequence, Tuple
 def parse_line(line: str) -> List[int]:
     return list(map(int, line.split(' ')))
 
-def is_safe(levels : List[int], max_unsafe : int ) -> bool:
-    return is_safe_dir(levels, -1, max_unsafe) or is_safe_dir(levels, 1, max_unsafe)
+def is_safe(levels : List[int] ) -> bool:
+    return is_safe_dir(levels, -1) or is_safe_dir(levels, 1)
 
-def is_safe_dir(levels : List[int], dir : int, max_unsafe : int) -> bool:
+def is_safe_dir(levels : List[int], dir : int) -> bool:
     
     # i=0
     # while True:
@@ -34,20 +34,19 @@ def is_safe_dir(levels : List[int], dir : int, max_unsafe : int) -> bool:
 
     prev = levels[0]
     pos = 1
-    if not check_safe(levels[0], levels[1]):
-        if max_unsafe == 0:
-            return False
-        max_unsafe -= 1
-        prev = levels[1]
-        pos = 2
-
 
     for n in levels[pos:] :
         if not check_safe(prev, n):
-            if max_unsafe == 0:
-                return False
-            max_unsafe -= 1
+            return False
         else:
             prev = n
 
     return True
+
+def is_safe_if_remove_one(levels : List[int]) -> bool:
+    for remove in range(len(levels)):
+        pre = levels[:remove]
+        post = levels[remove+1:]
+        if is_safe(pre+post):
+            return True
+    return False

@@ -15,8 +15,8 @@ def main():
     
     # Part 1
     for (n, levels) in zip(tools.natural_numbers(), input):
-        safe0 = prog.is_safe(levels, 0)
-        safe1 = prog.is_safe(levels, 1)
+        safe0 = prog.is_safe(levels)
+        safe1 = prog.is_safe_if_remove_one(levels)
         if safe0:
             sum_1 += 1
         if safe1:
@@ -24,7 +24,7 @@ def main():
         if not safe0:
             print(f'{levels} : {safe0}, {safe1}')
 
-    print(f'sum1:{sum_1}  sum2:{sum_2}')    ## sum1:242  sum2:26180
+    print(f'sum1:{sum_1}  sum2:{sum_2}')    ## sum1:242  sum2:311
 
 if __name__ == '__main__':
     main()
