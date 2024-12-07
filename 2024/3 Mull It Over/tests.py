@@ -13,7 +13,8 @@ class Tests(unittest.TestCase):
        
     def test_dot1(self):
         expected_results = ['mul(2,4)','mul(5,5)', 'mul(11,8)', 'mul(8,5)']
-        actual = prog.parse_muls(pattern1)
+        expected_results = [(2,4),(5,5),(11,8), (8,5)]
+        actual = prog.parse_muls_pairs(pattern1)
         self.assertEqual(expected_results, actual, 'Test 3.1')
 
     # def test_dot2(self):
