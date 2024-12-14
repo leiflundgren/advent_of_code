@@ -53,22 +53,23 @@ class Tests(unittest.TestCase):
         m = prog.parse_map(pattern1)
         n = m.get(Point(0,0))
         all_paths = prog.get_all_paths_from(n, LEN)
-        self.assertEqual(2, len(all_paths))
+        self.assertEqual(3, len(all_paths))
         
         
         n = m.get(Point(3,4))
         all_paths = prog.get_all_paths_from(n, LEN)
-        self.assertEqual(4, len(all_paths))
+        self.assertEqual(8, len(all_paths))
         good_paths = prog.find_all_match(PATTERN, all_paths)
         self.assertEqual(0, len(good_paths))
 
         n = m.get(Point(6,4))
         all_paths = prog.get_all_paths_from(n, LEN)
-        self.assertEqual(4, len(all_paths))
+        self.assertEqual(8, len(all_paths))
         good_paths = prog.find_all_match(PATTERN, all_paths)
         self.assertEqual(2, len(good_paths))
  
-
+        sum = prog.count_all_matches_map(PATTERN, m)
+        self.assertEqual(18, sum)
 
 if __name__ == '__main__':
     unittest.main()

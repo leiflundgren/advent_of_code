@@ -21,7 +21,7 @@ def get_all_paths_from(n : Node, len : int) -> List[List[Node]] :
     (pmin, pmax) = n.map.bounds
     def not_none(x):
         return not x is None
-    return list(tools.find_all( [ n.path(d, len, pmin, pmax) for d in Direction.four_dir ], not_none))
+    return list(tools.find_all( [ n.path(d, len, pmin, pmax) for d in Direction.eight_dir], not_none))
 
 def find_all_match(pattern : str, paths : List[List[Node]]) -> List[List[Node]]:
     def match(path : List[Node]) -> bool :
@@ -34,3 +34,12 @@ def find_all_match(pattern : str, paths : List[List[Node]]) -> List[List[Node]]:
 
         return True
     return list(tools.find_all(paths, match))
+
+def count_all_matches_map(pattern : str, m : Map) -> int:
+    res = 0
+    for n in m.values():
+        paths = get_all_paths_from(n, len(pattern)-1)
+        matches = find_all_match(pattern, paths)
+        l = len(matches)
+        res += l
+    return res

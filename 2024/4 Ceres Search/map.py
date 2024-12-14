@@ -117,5 +117,8 @@ class Map(object):
     def get(self, p : Point):
         return self.map[p]
 
+    def values(self) -> List[Node]:
+        return self.map.values()
+
 
 
