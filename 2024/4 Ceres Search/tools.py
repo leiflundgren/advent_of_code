@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from collections import UserList
-from typing import Iterable, Self, TypeVar, Sequence, overload, Generic
+from types import FunctionType
+from typing import Iterable, List, Self, TypeVar, Sequence, overload, Generic
 T = TypeVar('T')
 
 class ListIter(Generic[T]):
@@ -195,3 +196,8 @@ def split_list_on_empty_line(lines:list[str]) -> list[list[str]]:
 
     return res
 
+
+def find_all(ls : List, cond : FunctionType):
+    for x in ls:
+        if cond(x):
+            yield x

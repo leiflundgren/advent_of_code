@@ -1,52 +1,36 @@
 from re import X
+from directions import Direction
+from map import Map, Node, Point
 import tools
 from enum import Enum
 from typing import Iterable, Iterator, List, Self, Sequence, Tuple
 
-def parse_line(line: str) -> List[int]:
-    return list(map(int, line.split(' ')))
 
-def is_safe(levels : List[int] ) -> bool:
-    return is_safe_dir(levels, -1) or is_safe_dir(levels, 1)
-
-def is_safe_dir(levels : List[int], dir : int) -> bool:
-    
-    # i=0
-    # while True:
-    #     n0 = levels[i]
-    #     for i1 in range(1, 1+max_unsafe):
-    #         n = levels[i+i1]
-    #         diff = dir * (n0 - n)
-    #         if not ( 0 < diff and diff <= 3 ):
-    #             if max_unsafe == 0:
-    #                 return False
-    #             max_unsafe -= 1
-    #         else:
-    #             prev = n
+def parse_map(txtmap: str) -> Map:
+    lines = txtmap.splitlines()
+    m = Map()
+    for y in range(len(lines)):
+        line = lines[y]
+        for x in range(len(line)):
+            c = line[x]
+            m.add(Node(Point(x, y), c))
+    return m
 
 
-    #         pass
+def get_all_paths_from(n : Node, len : int) -> List[List[Node]] :
+    (pmin, pmax) = n.map.bounds
+    def not_none(x):
+        return not x is None
+    return list(tools.find_all( [ n.path(d, len, pmin, pmax) for d in Direction.four_dir ], not_none))
 
-    def check_safe(n1, n2):
-        diff = dir * (n1-n2)
-        return ( 0 < diff and diff <= 3 )
-
-
-    prev = levels[0]
-    pos = 1
-
-    for n in levels[pos:] :
-        if not check_safe(prev, n):
+def find_all_match(pattern : str, paths : List[List[Node]]) -> List[List[Node]]:
+    def match(path : List[Node]) -> bool :
+        if len(pattern) != len(path): 
             return False
-        else:
-            prev = n
 
-    return True
+        for c, n in zip(pattern, path):
+            if c != n.value: 
+                return False
 
-def is_safe_if_remove_one(levels : List[int]) -> bool:
-    for remove in range(len(levels)):
-        pre = levels[:remove]
-        post = levels[remove+1:]
-        if is_safe(pre+post):
-            return True
-    return False
+        return True
+    return list(tools.find_all(paths, match))

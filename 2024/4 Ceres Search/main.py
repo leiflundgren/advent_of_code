@@ -4,6 +4,9 @@ import time
 import prog
 import tools
 
+PATTERN = "XMAS"
+LEN = len(PATTERN)
+
 
 # entry point
 def main():
