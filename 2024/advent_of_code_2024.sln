@@ -11,6 +11,8 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "3 Mull It Over", "3 Mull It
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "4 Ceres Search", "4 Ceres Search\4 Ceres Search.pyproj", "{C605F42E-54F5-461D-AE82-95CE494FB7B6}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "5 Print Queue", "5 Print Queue\5 Print Queue.pyproj", "{A720A480-057E-451E-8EC8-B905409E3C4B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,8 @@ Global
 		{DD18091E-35C8-4F6F-BC70-7ED4541066B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C605F42E-54F5-461D-AE82-95CE494FB7B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C605F42E-54F5-461D-AE82-95CE494FB7B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A720A480-057E-451E-8EC8-B905409E3C4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A720A480-057E-451E-8EC8-B905409E3C4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
