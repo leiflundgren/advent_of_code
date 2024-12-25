@@ -17,15 +17,29 @@ class PrintJob(object):
 
 
     def adheres_to(self, order : Order) -> bool:
-        idx1 = self.pages.index(order.first)
-        if idx1 < 0:
+        try:
+            idx1 = self.pages.index(order.first)
+        except ValueError:
            return True
-        idx2 = self.pages.index(order.second)
-        return idx2 < 0 or idx2 > idx1
+        try:
+            idx2 = self.pages.index(order.second)
+            return idx2 > idx1
+        except ValueError:
+           return True
        
+    def in_correct_order(self, orders : List[Order]) -> bool:
+        return all( self.adheres_to(o) for o in orders)
 
+    def middle_page(self) -> int:
+        return self.pages[len(self.pages)//2]
 
+class Scenario(object):
+    def __init__(self, orders : List[Order], printjobs : List[PrintJob]) -> None:
+        self.orders = orders
+        self.printjobs = printjobs
 
+    def jobs_in_correct_order(self) -> List[PrintJob]:
+        return list(filter( lambda j: j.in_correct_order(self.orders), self.printjobs))
 
 def parse(txtmap: str) -> Tuple[List[Order], List[PrintJob]]:
     lines = txtmap.strip('\r\n').splitlines()

@@ -60,6 +60,16 @@ class Tests(unittest.TestCase):
         self.assertEqual(21, len(orders))
         self.assertEqual(6, len(pjobs))
 
+    def test1(self):
+        (orders, pjobs) = prog.parse(pattern1)
+        sc = prog.Scenario(orders, pjobs)
+
+        correct_jobs = sc.jobs_in_correct_order()
+        self.assertEqual(3, len(correct_jobs))
+
+        sum_ = sum( j.middle_page() for j in correct_jobs)
+
+        self.assertEqual(143, sum_)
 
 
 if __name__ == '__main__':
