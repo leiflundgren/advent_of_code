@@ -1,8 +1,7 @@
 import os
-from pathlib import Path
+import pathlib 
 import time
 import prog
-from text_map import TextMap
 import tools
 
 PATTERN = "XMAS"
@@ -13,17 +12,20 @@ LEN = len(PATTERN)
 def main():
 
     input_txt = os.path.join(os.path.dirname(__file__), 'input.txt')
-    input_str = Path(input_txt).read_text()
+    input_str = pathlib.Path(input_txt).read_text().strip()
 
     t0 = time.perf_counter()
 
-    map = prog.parse_map(input_str)
-    sum_1 = prog.count_all_matches_map(PATTERN, map)
+    (orders, pjobs) = prog.parse(input_str)
+    sc = prog.Scenario(orders, pjobs)
+    correct_jobs = sc.jobs_in_correct_order()
+
+    sum_1 = sum( j.middle_page() for j in correct_jobs)
     
     t1 = time.perf_counter()
 
-    tm = TextMap.parse_text(input_str)
-    sum_2 = len(prog.find_all_x_mas(tm))
+    
+    sum_2 = 0
 
     t2 = time.perf_counter()
 
