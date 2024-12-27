@@ -64,13 +64,49 @@ class Tests(unittest.TestCase):
         (orders, pjobs) = prog.parse(pattern1)
         sc = prog.Scenario(orders, pjobs)
 
-        correct_jobs = sc.jobs_in_correct_order()
+        correct_jobs = sc.filter_jobs_in_correct_order()
         self.assertEqual(3, len(correct_jobs))
 
-        sum_ = sum( j.middle_page() for j in correct_jobs)
-
+        sum_ = prog.sum_middle_page(correct_jobs)
         self.assertEqual(143, sum_)
 
+#     def test2(self):
+#         (orders, pjobs) = prog.parse('''
+# 47|53
+# 97|13
+# 97|61
+# 97|47
+# 75|29
+# 61|13
+# 75|53
+# 29|13
+# 97|29
+# 53|29
+
+#         ''')
+#         sc = prog.Scenario(orders, pjobs)
+#         sc.sort_orders()
+
+#         self.assertSequenceEqual([47, 53, 97, 61, 29, 13, 47, 75, 53, 29], sc.sorted_orders)
+    def test2(self):
+        (orders, pjobs) = prog.parse(pattern1)
+        sc = prog.Scenario(orders, pjobs)
+        
+
+
+        sc.filter_jobs_in_correct_order()
+        print(sc.incorrect)
+        batch2 = sc.sort_jobs(sc.incorrect)
+        print(batch2)
+        self.assertEqual(3, len(batch2))
+        # 75,97,47,61,53 becomes 97,75,47,61,53.
+        # 61,13,29 becomes 61,29,13.
+        # 97,13,75,29,47 becomes 97,75,47,29,13.
+
+        sum_ = prog.sum_middle_page(batch2)
+        self.assertEqual(123, sum_)
+
+  
 
 if __name__ == '__main__':
     unittest.main()
