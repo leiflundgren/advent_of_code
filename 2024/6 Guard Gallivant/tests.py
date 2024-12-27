@@ -34,6 +34,8 @@ def prLightGray(skk): print("\033[97m {}\033[00m" .format(skk), end='')
 def prBlack(skk): print("\033[98m {}\033[00m" .format(skk), end='')
     
 class Tests(unittest.TestCase):
+
+
     def test_1(self):
         m = TextMap.parse_text(pattern1)   
         v = prog.Guard.find_guard_pos(m)
@@ -50,9 +52,10 @@ class Tests(unittest.TestCase):
         cnt = g.count_unique_positions()
         self.assertEqual(41, cnt)
 
-    def test_2(self):
-        pass
+        #test 2
 
+        mods = g.modify_path_to_create_loops()
+        self.assertEqual(6, len(mods))
 
 if __name__ == '__main__':
     unittest.main()

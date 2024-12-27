@@ -1,3 +1,4 @@
+import datetime
 import os
 from pathlib import Path
 import time
@@ -37,18 +38,37 @@ def main():
     sum_1 = g.count_unique_positions()
 
     dt1 = time.perf_counter() - t0
-    
-    g.print_path(prBlack, prRed)
+    print(f'sum1:{sum_1}')  
+    print(f'dt1:{dt1}') 
+
+    # g.print_path(prBlack, prRed)
+    path1 = g.history
 
     t1 = time.perf_counter()
 
-    #tm = TextMap.parse_text(input_str)
-    sum_2 = 0 # len(prog.find_all_x_mas(tm))
+    mods = []
+    path_len = len(set([v.pos for v in g.history]))
+    for ((attempt, p), n) in zip(g.modify_path_to_create_loops_yield(), tools.natural_numbers()):
+        mods.append(p)
+        print(f'{n} obst={p} attempt={attempt} mods={len(mods)} ')
+        dt = time.perf_counter() - t1
+        t_per_attempt = dt / attempt
+        est_total_time = t_per_attempt * path_len
+        est_time_left = (int)(t_per_attempt * (path_len-attempt))
 
-    t2 = time.perf_counter()
+
+# get '14:39:57':
+# est_done.strftime('%H:%M:%S')
+        
+        print(f'time/attempt={t_per_attempt:.4f} est_total={est_total_time:.2f} est_time_left={est_time_left}')
+
+
+    sum_2 = len(mods)
+
+    dt2 = time.perf_counter() - t1
 
     print(f'sum1:{sum_1}  sum2:{sum_2}')    ## sum1:242  sum2:311
-    print(f'dt1:{t1-t0}  dt2:{(t2-t1)}') # 20513
+    print(f'dt1:{dt1}  dt2:{(dt2)}') # 20513
 
 if __name__ == '__main__':
     main()

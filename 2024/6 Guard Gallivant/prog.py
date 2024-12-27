@@ -4,7 +4,7 @@ from map import Map, Node, Point, Vector
 from text_map import TextMap
 import tools
 from enum import Enum
-from typing import Dict, Iterable, Iterator, List, Self, Sequence, Tuple
+from typing import Dict, Generator, Iterable, Iterator, List, Self, Sequence, Tuple
 
 
 def parse_map(txtmap: str) -> Map:
@@ -44,9 +44,16 @@ def count_all_matches_map(pattern : str, m : Map) -> int:
         res += l
     return res
 
+class WalkResult(Enum):
+    UNKNOWN=1
+    LEFT_MAP=2
+    LOOP=3
+
 class Guard(object):
     OBSTACLE = '#'
+    CLEAR = '.'
     GUARD_MARK = '^'
+    
 
     def find_guard_pos(map: TextMap) -> Vector:
         for x in range(map.width()):
@@ -70,6 +77,11 @@ class Guard(object):
         self.history.append(v)
         self.history_dict.setdefault(v.pos, []).append(v)
 
+    def clear_history(self, start_pos:Vector) -> None:
+        self.history = [] # create new, leave old in mem
+        self.history_dict = {}
+        self.set_pos(start_pos)
+
     def next_pos(self) -> Vector:
         d_ = self.dir()
         for attempt in range(4):
@@ -85,20 +97,24 @@ class Guard(object):
 
         raise ValueError(f'Could not move from {self.pos()}. Seems boxed in!')
 
-    def move_one(self) -> bool:
+    def move_one(self) -> WalkResult:
         p = self.pos();
         v_ = self.next_pos()
-        if any( v == v_ for v in self.history):
+        visits_to_point_before = self.history_dict.get(v_.pos)
+        if visits_to_point_before is not None and v_ in visits_to_point_before:
             print(f'found loop')
-            return False
-        elif self.map.is_inside(v_.pos.x, v_.pos.y):
-            self.set_pos(v_)
-            return True
+            return WalkResult.LOOP
+        elif not self.map.is_inside(v_.pos.x, v_.pos.y):
+            return WalkResult.LEFT_MAP
         else:
-            return False
+            self.set_pos(v_)
+            return WalkResult.UNKNOWN
 
-    def walk_path(self):
-        while self.move_one():
+    def walk_path(self) -> WalkResult:
+        while True:
+            r = self.move_one()
+            if r != WalkResult.UNKNOWN:
+                return r
             pass
 
     def count_unique_positions(self) -> int:
@@ -108,6 +124,35 @@ class Guard(object):
         for p in poss:
             uniq.add(p)
         return len(uniq)
+
+    # Returns list of where to add obstacle
+    def modify_path_to_create_loops(self) -> List[Point]:
+        res = []
+        for p in self.modify_path_to_create_loops_yield():
+            res.append(p)
+        return res
+
+    def modify_path_to_create_loops_yield(self) -> Generator[Tuple[int, Point], None, None]:
+
+        gtmp = Guard(self.history[0], self.map)
+
+        to_test = set([v.pos for v in self.history[1:]])
+
+        # skip first pos, since guard is already there
+        for (n, pos) in zip(tools.natural_numbers(), to_test):
+            # clear history, set to start pos
+            gtmp.clear_history(self.history[0])
+
+            # mark point as obstable
+            gtmp.map.set(pos.x, pos.y, Guard.OBSTACLE)
+
+            r = gtmp.walk_path()
+
+            # clear point as obstable
+            gtmp.map.set(pos.x, pos.y, Guard.CLEAR)
+            
+            if r == WalkResult.LOOP:
+                yield (n, pos)
 
     def print_path(self, def_print, highlight_print):
         for y in range(self.map.height()):

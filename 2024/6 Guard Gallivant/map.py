@@ -84,7 +84,7 @@ class Vector(object):
         return Point.equals(self.pos, other.pos) and self.dir == other.dir
 
     def __hash__(self) -> int:
-        return hash(self.x) + 3* hash(self.y) + 7*hash(self.dir)
+        return hash(self.pos.x) + 3* hash(self.pos.y) + 7*hash(self.dir)
 
     def __repr__(self) -> str:
         return f'({self.dir} {self.pos.x},{self.pos.y})'
