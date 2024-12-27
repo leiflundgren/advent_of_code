@@ -5,8 +5,14 @@ import prog
 from text_map import TextMap
 import tools
 
-PATTERN = "XMAS"
-LEN = len(PATTERN)
+def prRed(skk): print("\033[91m {}\033[00m" .format(skk), end='')
+def prGreen(skk): print("\033[92m {}\033[00m" .format(skk), end='')
+def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), end='')
+def prLightPurple(skk): print("\033[94m {}\033[00m" .format(skk), end='')
+def prPurple(skk): print("\033[95m {}\033[00m" .format(skk), end='')
+def prCyan(skk): print("\033[96m {}\033[00m" .format(skk), end='')
+def prLightGray(skk): print("\033[97m {}\033[00m" .format(skk), end='')
+def prBlack(skk): print("\033[98m {}\033[00m" .format(skk), end='')
 
 
 # entry point
@@ -17,13 +23,27 @@ def main():
 
     t0 = time.perf_counter()
 
-    map = prog.parse_map(input_str)
-    sum_1 = prog.count_all_matches_map(PATTERN, map)
+    m = TextMap.parse_text(input_str)   
+    v = prog.Guard.find_guard_pos(m)
+
+    g = prog.Guard(v, m)
+    g.walk_path()
+
+    # def color_select(x: int, y:int, d:Direction) -> str:
+    #     return prRed if Point(x,y) in g.history else prBlack
+
+    #m.print(color_select)
+
+    sum_1 = g.count_unique_positions()
+
+    dt1 = time.perf_counter() - t0
     
+    g.print_path(prBlack, prRed)
+
     t1 = time.perf_counter()
 
-    tm = TextMap.parse_text(input_str)
-    sum_2 = len(prog.find_all_x_mas(tm))
+    #tm = TextMap.parse_text(input_str)
+    sum_2 = 0 # len(prog.find_all_x_mas(tm))
 
     t2 = time.perf_counter()
 

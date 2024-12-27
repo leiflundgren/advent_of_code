@@ -4,7 +4,7 @@ from map import Map, Node, Point, Vector
 from text_map import TextMap
 import tools
 from enum import Enum
-from typing import Iterable, Iterator, List, Self, Sequence, Tuple
+from typing import Dict, Iterable, Iterator, List, Self, Sequence, Tuple
 
 
 def parse_map(txtmap: str) -> Map:
@@ -56,9 +56,11 @@ class Guard(object):
                     return Vector(Point(x, y), Direction.N)
 
     def __init__(self, vec : Vector, map : TextMap) -> None:
-        self.vec = vec
         self.map = map
-        self.history : List[Vector] = [vec]
+        self.history : List[Vector] = []
+        self.history_dict : Dict[Point, List[Vector]] = {}
+        
+        self.set_pos(vec)
 
     def pos(self): return self.vec.pos
     def dir(self): return self.vec.dir
@@ -66,6 +68,7 @@ class Guard(object):
     def set_pos(self, v:Vector) -> None:
         self.vec = v
         self.history.append(v)
+        self.history_dict.setdefault(v.pos, []).append(v)
 
     def next_pos(self) -> Vector:
         d_ = self.dir()
@@ -89,8 +92,7 @@ class Guard(object):
             print(f'found loop')
             return False
         elif self.map.is_inside(v_.pos.x, v_.pos.y):
-            self.history.append(v_)
-            self.vec = v_
+            self.set_pos(v_)
             return True
         else:
             return False
@@ -108,15 +110,16 @@ class Guard(object):
         return len(uniq)
 
     def print_path(self, def_print, highlight_print):
-      for y in range(self.map.height()):
+        for y in range(self.map.height()):
             for x in range(self.map.width()):
                 c = self.map.at(x, y)
                 pr = def_print
                   
-                for v in self.history:
-                    if v.pos == Point(x,y):
-                        pr = highlight_print
-                        c = v.dir.to_arrow()
+                p = Point(x,y)
+                v = self.history_dict.get(p)
+                if v is not None:
+                    pr = highlight_print
+                    c = v[0].dir.to_arrow()
                                         
                 pr(c + ' ')
             print()
