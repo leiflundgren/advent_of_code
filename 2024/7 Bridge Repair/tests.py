@@ -27,7 +27,7 @@ pattern1 = \
 class Tests(unittest.TestCase):
 
 
-    def test_1(self):
+    def test_basic(self):
         measures = prog.parse(pattern1)
         
         ab = ['a', 'b']
@@ -43,6 +43,18 @@ class Tests(unittest.TestCase):
         self.assertEqual(4, len(c2));
         self.assertEqual(8, len(c3));
         self.assertEqual(16, len(c4));
+
+        self.assertEqual(190, prog.calculate_result([10, 19], [prog.MultiplicateOperator()]))
+        self.assertEqual(292, prog.calculate_result([11, 6, 16, 20], [prog.AddOperator(), prog.MultiplicateOperator(), prog.AddOperator()]))
+
+
+    def test1(self):
+        measures = prog.parse(pattern1)
+
+        w = prog.Worker()
+        summ = w.sum_result_of_matching(measures)
+        self.assertEqual(3749, summ)
+
 
 if __name__ == '__main__':
     unittest.main()
