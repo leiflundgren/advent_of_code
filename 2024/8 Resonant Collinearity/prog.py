@@ -35,11 +35,37 @@ class Worker(object):
                 self.by_freq.setdefault(val, []).append(p)
 
 
-    def find_interference_point(self) -> Iterator[Point] :
+    def find_interference_point(self, onlyFirstNode) -> Iterator[Point] :
         seen : Set[Point] = set()
         for (hz, p_ls) in self.by_freq.items():
             for (p1, p2) in all_pairs(p_ls):
-                for i in find_interference_nodes(p1, p2):
-                    if not i in seen and self.map.contains(i):
+                for i in self.find_interference_nodes(p1, p2, onlyFirstNode):
+                    if not i in seen:
                         seen.add(i)
                         yield i
+
+    def find_interference_nodes(self, p1 : Point, p2 : Point, onlyFirstNode : bool) -> Iterator[Point] :
+        if p1.y > p2.y: return self.find_interference_nodes(p2, p1, onlyFirstNode)
+
+        dist = Point.diff_points(p2, p1)
+
+        if not onlyFirstNode:
+            yield p1
+            yield p2
+
+        while True:
+            p1 = Point.diff_points(p1, dist)
+            p2 = Point.add_points(p2, dist)
+
+            in1 = self.map.contains(p1)
+            in2 = self.map.contains(p2)
+            if not in1 and not in2:
+                break # left the map
+
+            if in1:
+                yield p1
+            if in2:
+                yield p2
+
+            if onlyFirstNode:
+                break

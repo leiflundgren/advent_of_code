@@ -65,17 +65,12 @@ class Tests(unittest.TestCase):
 
 
         w = prog.Worker(m)
-        points = list(w.find_interference_point())
+        points = list(w.find_interference_point(True))
         self.assertEqual(14, len(points))
 
-        # need_append = [m for m in measures if m not in matching1]
-        # self.assertEqual(len(measures)-len(matching1), len(need_append))
+        points = list(w.find_interference_point(False))
+        self.assertEqual(34, len(points))
 
-        # w.clear([prog.AddOperator(), prog.MultiplicateOperator(), prog.ConcatenateOperator()])
-        # matching2 = w.filter_of_matching(need_append) 
-        # sum_3 = w.sum_results(matching2)
-        # sum_2 = sum_1 + sum_3
-        # self.assertEqual(11387, sum_2)
         pass
 
 
