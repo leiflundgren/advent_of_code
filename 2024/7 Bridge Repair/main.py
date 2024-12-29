@@ -17,8 +17,9 @@ def main():
       
     measures = prog.parse(input_str)
 
-    w = prog.Worker()
-    sum_1 = w.sum_result_of_matching(measures)
+    w = prog.Worker([prog.AddOperator(), prog.MultiplicateOperator()])
+    matching1 = w.filter_of_matching(measures)
+    sum_1 = w.sum_results(matching1)
 
     dt1 = time.perf_counter() - t0
     print(f'sum1:{sum_1}')  
@@ -26,8 +27,10 @@ def main():
 
     t1 = time.perf_counter()
 
-    
-    sum_2 = 0
+    w = prog.Worker([prog.AddOperator(), prog.MultiplicateOperator(), prog.ConcatenateOperator()])
+
+    matching2 = w.filter_of_matching(measures)
+    sum_2 = w.sum_results(matching2)
 
     dt2 = time.perf_counter() - t1
 

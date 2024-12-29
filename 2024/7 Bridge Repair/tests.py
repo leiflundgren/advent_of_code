@@ -51,9 +51,20 @@ class Tests(unittest.TestCase):
     def test1(self):
         measures = prog.parse(pattern1)
 
-        w = prog.Worker()
-        summ = w.sum_result_of_matching(measures)
-        self.assertEqual(3749, summ)
+        w = prog.Worker([prog.AddOperator(), prog.MultiplicateOperator()])
+        matching1 = w.filter_of_matching(measures)
+        self.assertEqual(3, len(matching1))
+        sum_1 = w.sum_results(matching1)
+        self.assertEqual(3749, sum_1)
+
+        need_append = [m for m in measures if m not in matching1]
+        self.assertEqual(len(measures)-len(matching1), len(need_append))
+
+        w.clear([prog.AddOperator(), prog.MultiplicateOperator(), prog.ConcatenateOperator()])
+        matching2 = w.filter_of_matching(need_append) 
+        sum_3 = w.sum_results(matching2)
+        sum_2 = sum_1 + sum_3
+        self.assertEqual(11387, sum_2)
 
 
 if __name__ == '__main__':

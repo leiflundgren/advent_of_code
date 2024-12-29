@@ -12,6 +12,8 @@ class Measure(object):
         self.result = result
         self.args = args
 
+    def __repr__(self) -> str:
+        return f'{self.result} <= {self.args}'
 
 def parse(txt: str) -> List[Measure]:
     lines = txt.strip('\r\n').splitlines()
@@ -49,7 +51,13 @@ class MultiplicateOperator(Operator):
     def operate(self, x:int, y:int) -> int:
         return x * y
 
-all_operators = [ AddOperator(), MultiplicateOperator() ]
+class ConcatenateOperator(Operator):
+    def __init__(self):
+        super().__init__('||')
+
+    def operate(self, x:int, y:int) -> int:
+        return int(str(x) + str(y))
+
 
 def generate_combinations(symbols:List, length:int) -> List:
     base_ls = [None] * length
@@ -80,13 +88,17 @@ def calculate_result(args:List[int], operators:List[Operator]) -> int:
     return res
 
 class Worker(object):
-    def __init__(self):
+    def __init__(self, operators : List[Operator]):
+        self.clear(operators)
+
+    def clear(self, operators : List[Operator]):
+        self.operators = operators
         self.combinations : Dict[int, List[Operator]] = {}
 
     def get_combinations(self, length:int) -> List[Operator]:
         op = self.combinations.get(length)
         if op is None:
-            op = generate_combinations(all_operators, length)
+            op = generate_combinations(self.operators, length)
             self.combinations[length] = op
         return op
 
@@ -100,11 +112,8 @@ class Worker(object):
 
         return None
 
-    def sum_result_of_matching(self, ms : List[Measure]) -> int:
-        res = 0
-        for m in ms:            
-            correct = self.find_matching(m)
-            if correct is not None:
-                res += m.result
+    def filter_of_matching(self, measures : List[Measure]) -> List[Measure]:
+        return list(filter(self.find_matching, measures))
 
-        return res
+    def sum_results(self, measures : List[Measure]) -> int:
+        return sum(m.result for m in measures)
