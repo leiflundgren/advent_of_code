@@ -6,7 +6,7 @@ from map import Map, Node
 from text_map import TextMap
 import tools
 from enum import Enum
-from typing import Dict, Generator, Iterable, Iterator, List, Self, Sequence, Set, Tuple
+from typing import Dict, Iterable, Iterator, List, Self, Sequence, Set, Tuple
 
 def find_interference_nodes(p1 : Point, p2 : Point) -> Tuple[Point, Point] :
     if p1.y > p2.y: return find_interference_nodes(p2, p1)
@@ -31,13 +31,15 @@ class Worker(object):
         self.by_freq : Dict[str, List[Point]] = {}
 
         for (p, val) in self.map.nodes():
-            if val != '.':
+            if val != '.' and val != '#':
                 self.by_freq.setdefault(val, []).append(p)
 
 
     def find_interference_point(self, onlyFirstNode) -> Iterator[Point] :
         seen : Set[Point] = set()
         for (hz, p_ls) in self.by_freq.items():
+            if len(p_ls) == 1:
+                bp = 17
             for (p1, p2) in all_pairs(p_ls):
                 for i in self.find_interference_nodes(p1, p2, onlyFirstNode):
                     if not i in seen:
