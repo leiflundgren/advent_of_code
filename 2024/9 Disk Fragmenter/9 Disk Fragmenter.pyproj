@@ -3,9 +3,9 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{d6317be3-fa12-4cc7-aad2-6c0214833a5e}</ProjectGuid>
+    <ProjectGuid>{17f8f6fb-d045-4472-a260-c3d5581c029b}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>main.py</StartupFile>
+    <StartupFile>tests.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -21,6 +21,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="input.txt" />
+    <Content Include="input2.txt" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="directions.py" />

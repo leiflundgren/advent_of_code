@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from collections import UserList
 from types import FunctionType
-from typing import Iterable, Iterator, List, Self, TypeVar, Sequence, overload, Generic
+from typing import Any, Iterable, Iterator, List, Self, TypeVar, Sequence, overload, Generic
 T = TypeVar('T')
 
 class ListIter(Generic[T]):
@@ -144,8 +144,8 @@ def infinite_iterator(base_src):
 def natural_numbers(start = 0):
     i = start
     while True:
-        i = i+1
         yield i
+        i = i+1
             
 
 def hashOfList(ls : Iterable[T]) -> int:
@@ -197,7 +197,7 @@ def split_list_on_empty_line(lines:list[str]) -> list[list[str]]:
     return res
 
 
-def find_all(ls : List, cond : FunctionType):
+def find_all(ls : List, cond : FunctionType) -> Iterator[int]:
     for x in ls:
         if cond(x):
             yield x
@@ -207,6 +207,16 @@ def count_iter(it : Iterator) -> int :
     for (i, n) in zip(it, natural_numbers()):
         l = n
     return l
+
+def index_of(x : Any, ls : Iterator[Any]) -> Iterator[int]:
+    for (y, i) in zip(ls, natural_numbers()):
+        if x == y:
+            yield i
+def first_index_of(x : Any, ls : Iterator[Any]) -> int:
+    it = index_of(x, ls)
+    n = next(it, None)
+    return n if n is not None else -1
+
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), end='')
 def prGreen(skk): print("\033[92m {}\033[00m" .format(skk), end='')
