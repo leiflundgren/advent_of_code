@@ -21,7 +21,7 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "8 Resonant Collinearity", "
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "9 Disk Fragmenter", "9 Disk Fragmenter\9 Disk Fragmenter.pyproj", "{17F8F6FB-D045-4472-A260-C3D5581C029B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ricardoramo-s", "9 Disk Fragmenter\ricardoramo-s\ricardoramo-s.vcxproj", "{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "10 Hoof It", "10 Hoof It\10 Hoof It.pyproj", "{DB04577C-8985-1225-9BAD-23A8A047790F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,18 +89,12 @@ Global
 		{17F8F6FB-D045-4472-A260-C3D5581C029B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17F8F6FB-D045-4472-A260-C3D5581C029B}.Release|x64.ActiveCfg = Release|Any CPU
 		{17F8F6FB-D045-4472-A260-C3D5581C029B}.Release|x86.ActiveCfg = Release|Any CPU
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Debug|Any CPU.Build.0 = Debug|x64
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Debug|x64.ActiveCfg = Debug|x64
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Debug|x64.Build.0 = Debug|x64
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Debug|x86.ActiveCfg = Debug|Win32
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Debug|x86.Build.0 = Debug|Win32
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Release|Any CPU.ActiveCfg = Release|x64
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Release|Any CPU.Build.0 = Release|x64
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Release|x64.ActiveCfg = Release|x64
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Release|x64.Build.0 = Release|x64
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Release|x86.ActiveCfg = Release|Win32
-		{21C55D7F-49F2-4C22-8C8E-D7D6A3BA96B4}.Release|x86.Build.0 = Release|Win32
+		{DB04577C-8985-1225-9BAD-23A8A047790F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB04577C-8985-1225-9BAD-23A8A047790F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DB04577C-8985-1225-9BAD-23A8A047790F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DB04577C-8985-1225-9BAD-23A8A047790F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB04577C-8985-1225-9BAD-23A8A047790F}.Release|x64.ActiveCfg = Release|Any CPU
+		{DB04577C-8985-1225-9BAD-23A8A047790F}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
