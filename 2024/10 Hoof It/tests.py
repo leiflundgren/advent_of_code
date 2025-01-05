@@ -1,61 +1,69 @@
-from typing import List
+from typing import Dict, List, Set
 import unittest
 from directions import Direction
 from map import Map, Node, Point
+from prog import Path
 import prog
 from text_map import TextMap
 import tools
-#from colorama import Fore, Back, Style
-#from termcolor import colored, cprint
-
-import prog 
 
 pattern1 = \
 '''
-....#.....
-.........#
-..........
-..#.......
-.......#..
-..........
-.#..^.....
-........#.
-#.........
-......#...
+89010123
+78121874
+87430965
+96549874
+45678903
+32019012
+01329801
+10456732
 '''.strip()
 
-def prRed(skk): print("\033[91m {}\033[00m" .format(skk), end='')
-def prGreen(skk): print("\033[92m {}\033[00m" .format(skk), end='')
-def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), end='')
-def prLightPurple(skk): print("\033[94m {}\033[00m" .format(skk), end='')
-def prPurple(skk): print("\033[95m {}\033[00m" .format(skk), end='')
-def prCyan(skk): print("\033[96m {}\033[00m" .format(skk), end='')
-def prLightGray(skk): print("\033[97m {}\033[00m" .format(skk), end='')
-def prBlack(skk): print("\033[98m {}\033[00m" .format(skk), end='')
-    
+
 class Tests(unittest.TestCase):
 
 
     def test_1(self):
-        m = TextMap.parse_text(pattern1)   
-        v = prog.Guard.find_guard_pos(m)
+        pattern0 = '''
+0123
+1234
+8765
+9876
+'''
+        m = TextMap.parse_text(pattern0)
+        starts = prog.Path(m).find_start_pos()
+        self.assertEqual(1, len(list(starts)))
 
-        g = prog.Guard(v, m)
-        g.walk_path()
+        m = TextMap.parse_text(pattern1)
+        starts = prog.Path(m).find_start_pos()
+        self.assertEqual(9, len(list(starts)))
 
-        # def color_select(x: int, y:int, d:Direction) -> str:
-        #     return prRed if Point(x,y) in g.history else prBlack
+        sum = 0
+        trailheads : Dict[Point, List[Point]]= {}
+        
+        scores = [5, 6, 5, 3, 1, 3, 5, 3, 5]
+        path = prog.Path(m)
+        for start in path.find_start_pos():
+            paths = path.walk_path(start)
 
-        #m.print(color_select)
-        g.print_path(prBlack, prRed)
+            endp : Set[Point] = set()
+            for p in paths:
+                endp.add(p[-1])
 
-        cnt = g.count_unique_positions()
-        self.assertEqual(41, cnt)
+            score = len(endp)
+            
+            print(f'start:{start} score: {score}')
+            # for p in paths:
+            #     print(Path.to_string_map(m, p))
+            
+            sum += score
+    
+            self.assertIn(score, scores)
+            scores.remove(score)
 
-        #test 2
+        self.assertEqual(36, sum)
 
-        mods = g.modify_path_to_create_loops()
-        self.assertEqual(6, len(mods))
+
 
 if __name__ == '__main__':
     unittest.main()
