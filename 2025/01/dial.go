@@ -1,6 +1,8 @@
 package day01
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Direction rune
 
@@ -64,12 +66,4 @@ func CountZeros(dials []Dial) int {
 		}
 	}
 	return zeros
-}
-
-func Hello(name string) string {
-	return "Hello, " + name
-}
-
-func main() {
-	fmt.Println(Hello("world"))
 }

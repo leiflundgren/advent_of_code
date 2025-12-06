@@ -1,6 +1,8 @@
 package day01
 
 import (
+	"fmt"
+	"os"
 	"strings"
 	"testing"
 )
@@ -52,4 +54,24 @@ L82
 		t.Fatalf("got %d zeroes, want 3", z)
 	}
 
+}
+
+func TestInput(t *testing.T) {
+	content, err := os.ReadFile("input.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	//lines []string
+	lines := strings.FieldsFunc(string(content), func(c rune) bool { return c == '\n' || c == '\r' })
+
+	dials := ParseDials(lines)
+	zeros := CountZeros(dials)
+	fmt.Printf("Number of zeroes: %d\n", zeros)
+}
+
+func TestMain(m *testing.M) {
+	exitVal := m.Run()
+
+	os.Exit(exitVal)
 }
