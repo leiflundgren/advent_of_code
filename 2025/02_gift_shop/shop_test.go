@@ -104,7 +104,7 @@ func TestInput(t *testing.T) {
 		sum += test_range(t, i, "B")
 	}
 
-	fmt.Printf("B: Total sum of invalid IDs: %d\n", sum)
+	fmt.Printf("B: Total sum of invalid IDs: %d\n", sum) // 44143124633
 }
 
 func TestMain(m *testing.M) {
