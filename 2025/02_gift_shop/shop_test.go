@@ -1,6 +1,7 @@
 package day02
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
@@ -9,7 +10,8 @@ var test_input string = `11-22,95-115,998-1012,1188511880-1188511890,222220-2222
 1698522-1698528,446443-446449,38593856-38593862,565653-565659,
 824824821-824824827,2121212118-2121212124`
 
-var expected_invalids [][]int = nil
+var expected_invalids_A [][]int = nil
+var expected_invalids_B [][]int = nil
 
 var id_ranges []Range
 
@@ -21,17 +23,32 @@ func sum(arr []int) int {
 	return n
 }
 
-func test_range(t *testing.T, i int) int {
+func test_range(t *testing.T, i int, testName string) int {
 	r := id_ranges[i]
-	invalids := find_invalid_ids(r)
-	if expected_invalids != nil && len(expected_invalids) > i {
-		want := expected_invalids[i]
+	var expected_invalids_ [][]int
+	var want []int = nil
+
+	if testName == "A" {
+		expected_invalids_ = expected_invalids_A
+	} else {
+		expected_invalids_ = expected_invalids_B
+	}
+	if expected_invalids_ != nil && len(expected_invalids_) > i {
+		want = expected_invalids_[i]
+	}
+
+	invalids := find_invalid_ids(r, testName == "A")
+	str_ids := ""
+	for _, v := range invalids {
+		str_ids += fmt.Sprintf("%d ", v)
+	}
+	if want != nil {
 		if len(invalids) != len(want) {
-			t.Errorf("range %d: got %d invalids, want %d", i, len(invalids), len(want))
+			t.Errorf("test %s range %d: got %d invalids, want %d\n%s", testName, i, len(invalids), len(want), str_ids)
 		} else {
 			for j := 0; j < len(want); j++ {
 				if invalids[j] != want[j] {
-					t.Errorf("range %d: invalids[%d]=%d, want[%d]=%d", i, j, invalids[j], j, want[j])
+					t.Errorf("test %s range %d: invalids[%d]=%d, want[%d]=%d", testName, i, j, invalids[j], j, want[j])
 				}
 			}
 		}
@@ -44,7 +61,7 @@ func Test_A(t *testing.T) {
 
 	sum := 0
 	for i := 0; i < len(id_ranges); i++ {
-		sum += test_range(t, i)
+		sum += test_range(t, i, "A")
 	}
 
 	expected_sum := 1227775554
@@ -53,32 +70,48 @@ func Test_A(t *testing.T) {
 	}
 }
 
+func Test_B(t *testing.T) {
+
+	sum := 0
+	for i := 0; i < len(id_ranges); i++ {
+		sum += test_range(t, i, "B")
+	}
+
+	expected_sum := 4174379265
+	if sum != expected_sum {
+		t.Errorf("Total sum of invalid IDs: got %d, want %d", sum, expected_sum)
+	}
+}
+
 func TestInput(t *testing.T) {
+
+	// Stop simple tests
+	expected_invalids_A = nil
+	expected_invalids_B = nil
 
 	content, _ := os.ReadFile("input.txt")
 	id_ranges = parse_IDs(string(content))
 
-	expected_invalids = nil
-	// Disable test for now
+	sum := 0
+	for i := 0; i < len(id_ranges); i++ {
+		sum += test_range(t, i, "A")
+	}
 
-	// if err != nil {
-	// 	panic(err)
-	// }
+	fmt.Printf("A: Total sum of invalid IDs: %d\n", sum)
 
-	// //lines []string
-	// lines := strings.FieldsFunc(string(content), func(c rune) bool { return c == '\n' || c == '\r' })
+	sum = 0
+	for i := 0; i < len(id_ranges); i++ {
+		sum += test_range(t, i, "B")
+	}
 
-	// dials := ParseDials(lines)
-	// zeroA := CountZerosA(dials) // 1145
-	// zeroB := CountZerosB(dials) // 6561
-	// fmt.Printf("Number of zeroes: A=%d B=%d\n", zeroA, zeroB)
+	fmt.Printf("B: Total sum of invalid IDs: %d\n", sum)
 }
 
 func TestMain(m *testing.M) {
 
 	id_ranges = parse_IDs(test_input)
 
-	expected_invalids = [][]int{
+	expected_invalids_A = [][]int{
 		{11, 22},
 		{99},
 		{1010},
@@ -87,6 +120,14 @@ func TestMain(m *testing.M) {
 		{},
 		{446446},
 		{38593859},
+	}
+
+	expected_invalids_B = [][]int{
+		{11, 22},
+		{99, 111},
+		{999, 1010},
+		{1188511885},
+		{222222},
 	}
 
 	exitVal := m.Run()

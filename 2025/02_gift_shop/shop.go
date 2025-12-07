@@ -9,15 +9,43 @@ type Range struct {
 	End   int
 }
 
-func find_invalid_ids(r Range) []int {
+func find_invalid_ids(r Range, isA bool) []int {
 	invalids := make([]int, 0)
 	for id := r.Start; id <= r.End; id++ {
 		s := fmt.Sprintf("%d", id)
-		if only_repeated_seqyences_twice(s) {
-			invalids = append(invalids, id)
+		if isA {
+			if only_repeated_seqyences_twice(s) {
+				invalids = append(invalids, id)
+			}
+		} else {
+			if only_repeated_seqyences(s) {
+				invalids = append(invalids, id)
+			}
 		}
 	}
 	return invalids
+}
+
+func only_repeated_seqyences(s string) bool {
+	n := len(s)
+	for i := 1; i < n; i++ {
+		if (n % i) == 0 { // check len is devisible by i
+			part1 := s[:i]
+
+			all_match := true
+			for j := i; j < n; j += i {
+				partj := s[j : j+i]
+				if partj != part1 {
+					all_match = false
+					break
+				}
+			}
+			if all_match {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func only_repeated_seqyences_twice(s string) bool {
