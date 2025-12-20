@@ -75,9 +75,9 @@ func TestInput(t *testing.T) {
 
 	t0 = time.Now()
 	sum = 0
-	// for i := 0; i < len(id_ranges); i++ {
-	// 	sum += test_range(t, i, "B")
-	// }
+	for i := 0; i < len(lines); i++ {
+		sum += test_range(t, i, "B", lines, nil)
+	}
 
 	fmt.Printf("B: Total sum of invalid IDs: %d took %s\n", sum, time.Since(t0)) // 16854
 
