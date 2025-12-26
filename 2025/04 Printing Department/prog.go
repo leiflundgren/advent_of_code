@@ -1,4 +1,4 @@
-package day03
+package day04
 
 import (
 	"strings"
@@ -26,6 +26,15 @@ func inner_points(lines []string) [][2]int {
 		}
 	}
 	return points
+}
+
+func setIndices(indices [][2]int, chr byte, lines []string) {
+	for _, p := range indices {
+		x, y := p[0], p[1]
+		row := []byte(lines[x])
+		row[y] = chr
+		lines[x] = string(row)
+	}
 }
 
 func num_free_edges(lines []string, i, j int) int {

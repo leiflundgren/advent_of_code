@@ -1,4 +1,4 @@
-package day03
+package day04
 
 import (
 	"fmt"
@@ -23,6 +23,7 @@ var test_input = []string{
 }
 
 var expected_positions_a [][2]int
+var expected_positions_b [][2]int
 
 func init_expected_positions() {
 
@@ -75,20 +76,52 @@ func Test_A(t *testing.T) {
 	}
 }
 
-// func Test_B(t *testing.T) {
+func Test_B(t *testing.T) {
 
-// 	expected := []int{987654321111, 811111111119, 434234234278, 888911112111}
+	expanded := add_outer_edges(test_input)
+	sum := 0
 
-// 	sum := 0
-// 	for i := 0; i < len(test_input); i++ {
-// 		sum += test_range(t, i, "B", test_input, expected)
-// 	}
+	for i := 0; i < 10; i++ {
 
-// 	expected_sum := 3121910778619
-// 	if sum != expected_sum {
-// 		t.Errorf("Total sum of invalid IDs: got %d, want %d", sum, expected_sum)
-// 	}
-// }
+		fmt.Printf("Iteration %d\n", i)
+		for _, line := range expanded {
+			fmt.Println(line)
+		}
+		fmt.Println("")
+
+		accessible_rolls := find_rolls_with_n_free_edges(expanded, 5)
+
+		if len(accessible_rolls) == 0 {
+			break
+		}
+
+		// if len(expected_positions_b) > i {
+		// 	for _, p := range expected_positions_b[i] {
+		// 		if !slices.Contains(accessible_rolls, p) {
+		// 			t.Errorf("FAIL: Position %v not found but expected", p)
+		// 		}
+		// 	}
+		// 	for _, p := range accessible_rolls {
+		// 		if !slices.Contains(expected_positions_b[i], p) {
+		// 			t.Errorf("FAIL: Position %v not found but expected", p)
+		// 		}
+		// 	}
+
+		// 	if len(accessible_rolls) != len(expected_positions_b[i]) {
+		// 		t.Errorf("FAIL: Number of accessible rolls: got %d, want %d", len(accessible_rolls), len(expected_positions_b[i]))
+		// 	}
+		// }
+
+		setIndices(accessible_rolls, '.', expanded)
+
+		sum += len(accessible_rolls)
+	}
+
+	expected_sum := 43
+	if sum != expected_sum {
+		t.Errorf("FAIL: Total sum of accessible rolls: got %d, want %d", sum, expected_sum)
+	}
+}
 
 func TestInput(t *testing.T) {
 
@@ -101,10 +134,31 @@ func TestInput(t *testing.T) {
 	expanded := add_outer_edges(input)
 	accessible_rolls := find_rolls_with_n_free_edges(expanded, 5)
 
-	fmt.Printf("A: Total sum of accessible rolls: %d took %s\n", len(accessible_rolls), time.Since(t0)) // 16854
+	fmt.Printf("A: Total sum of accessible rolls: %d took %s\n", len(accessible_rolls), time.Since(t0)) // 1363
 
 	t0 = time.Now()
-	//	fmt.Printf("B: Total sum of invalid IDs: %d took %s\n", sum, time.Since(t0)) // 16854
+
+	sum := 0
+	for i := 0; ; i++ {
+
+		fmt.Printf("Iteration %d\n", i)
+		for _, line := range expanded {
+			fmt.Println(line)
+		}
+
+		accessible_rolls := find_rolls_with_n_free_edges(expanded, 5)
+
+		if len(accessible_rolls) == 0 {
+			break
+		}
+
+		sum += len(accessible_rolls)
+		fmt.Printf("iter %d  Found %d accessible rolls\n", i, len(accessible_rolls))
+
+		setIndices(accessible_rolls, '.', expanded)
+	}
+
+	fmt.Printf("B: Total sum of accessible rolls: %d took %s\n", sum, time.Since(t0)) // 8184
 
 }
 
